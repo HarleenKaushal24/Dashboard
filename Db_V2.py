@@ -132,8 +132,8 @@ dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E
                'https://app.smartsheet.com/b/publish?EQBCT=0b9711dc34c84f839627f7440c967f9c',
                'https://app.smartsheet.com/b/publish?EQBCT=2d1535f74b874cc4a06d2905b99853c1',
                'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c'],
-        'x':[620,820,675,775,500,440,400,340,280],
-        'y':[1050,1050,1100,1100,900,850,900,850,900]}
+        'x':[600,800,655,755,480,420,380,320,260],
+        'y':[1040,1040,1090,1090,890,840,890,840,890]}
 
 db = pd.DataFrame(dbs)
 report1=pd.merge(dept_report, db,left_on="Equipment", right_on="Equip", how="right")
