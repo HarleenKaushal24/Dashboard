@@ -174,11 +174,31 @@ for _, row in report1.iterrows():
     """
 
 # Close map div and start side panel
+overlay_html = f"""
+<div style="display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;">
+
+  <!-- Factory Map with Equipment Buttons -->
+  <div style="position: relative; width: 100%; max-width: 1500px; height: auto; background-image: url('{image_base64}'); background-size: contain; background-position: center; border: 2px solid #ccc;">
+"""
+
+# Add equipment buttons with percentage-based positioning
+for _, row in report1.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}%; left: {row['x']}%;">
+        <a href="javascript:void(0)" onclick="showOptions('{row['Equip']}', '{row['Db']}')"
+            style="background: {row['Colour']}; padding: 6px 12px; border-radius: 26px;
+                    text-decoration: none; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+            {row['Equip']}
+        </a>
+    </div>
+    """
+
+# Close map div and start side panel
 overlay_html += """
   </div>
 
   <!-- Side Options Panel -->
-  <div id="side-options" style="margin-top: 20px; padding: 20px; border-left: 2px solid #ccc; width: 400px; min-height: 200px;">
+  <div id="side-options" style="margin-top: 20px; padding: 20px; border-left: 2px solid #ccc; width: 100%; max-width: 400px; min-height: 200px;">
     <p style="color: #777;">Click on an equipment button to see options here.</p>
   </div>
 
@@ -188,10 +208,10 @@ overlay_html += """
     // Equipment descriptions from report1
     window.equipData = """ + json.dumps(
         report1[['Equip', 'Description','Colour']].dropna().to_dict(orient="records")
-    ) + """;
+    ) + """; 
 
     // BSE spec data for all equipment
-    window.bseData = """ + json.dumps(links[['Equipment', 'BSE', 'Links']].dropna().to_dict(orient="records")) + """;
+    window.bseData = """ + json.dumps(links[['Equipment', 'BSE', 'Links']].dropna().to_dict(orient="records")) + """; 
 
     // Function to show dashboard and spec buttons in side panel
     function showOptions(equip, link) {
@@ -214,11 +234,9 @@ overlay_html += """
         const filtered = window.bseData.filter(row => row.Equipment === equip);
         if (filtered.length > 0) {
             const label = document.createElement('div');
-            // label.innerHTML = '<h5 style="margin-top: 20px;">Spec Sheets</h5>';
             panel.appendChild(label);
             filtered.forEach(row => {
                 const btn = document.createElement('button');
-                //Images/Spec.png
                 btn.innerText = ' Parameter Sheets ' + row.BSE;
                 btn.style.display = 'flex';
                 btn.style.alignItems = 'center';
@@ -250,8 +268,7 @@ overlay_html += """
             panel.appendChild(msg);
         }
             
-            
-         // Show description
+        // Show description
         const descData = window.equipData.find(row => row.Equip === equip);
         if (descData) {
            const descBox = document.createElement('div');
@@ -263,13 +280,29 @@ overlay_html += """
            descBox.style.borderRadius = '8px';
            descBox.style.boxShadow = '1px 1px 3px rgba(0,0,0,0.1)';
            descBox.style.fontSize = '25px';
-           // descBox.style.borderLeft = '4px solid #2857a7'; // accent strip
            panel.appendChild(descBox);
         }
-        
-        
     }
 </script>
+
+<style>
+    /* Responsive button size */
+    @media screen and (max-width: 600px) {
+        button {
+            width: 80%;
+            height: auto;
+            font-size: 14px;
+        }
+    }
+
+    @media screen and (min-width: 601px) {
+        button {
+            width: 222px;
+            height: 320px;
+            font-size: 18px;
+        }
+    }
+</style>
 """
 
 # Render to Streamlit
