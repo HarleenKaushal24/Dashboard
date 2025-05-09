@@ -132,7 +132,7 @@ dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E
                'https://app.smartsheet.com/b/publish?EQBCT=0b9711dc34c84f839627f7440c967f9c',
                'https://app.smartsheet.com/b/publish?EQBCT=2d1535f74b874cc4a06d2905b99853c1',
                'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c'],
-        'x':[720,920,775,875,600,540,500,440,380],
+        'x':[620,820,675,775,500,440,400,340,280],
         'y':[1050,1050,1100,1100,900,850,900,850,900]}
 
 db = pd.DataFrame(dbs)
@@ -155,7 +155,7 @@ links=pd.concat([bak_bse,enr_bse],axis=0)
 
 # ----- HTML with embedded JS -----
 overlay_html = f"""
-<div style="width: 1920px; margin: 0 auto; display: flex; align-items: flex-start;">
+<div style="width: 1600px; margin: 0 auto; display: flex; align-items: flex-start;">
 
   <!-- Factory Map with Equipment Buttons -->
   <div style="position: relative; width: 1500px; height: 1600px; 
