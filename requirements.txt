@@ -1,5 +1,6 @@
 streamlit
 smartsheet-python-sdk
+streamlit-autorefresh
 numpy
 pandas
 openpyxl
