@@ -1,5 +1,5 @@
 streamlit
-smartsheet
+smartsheet-python-sdk
 numpy
 pandas
 openpyxl
