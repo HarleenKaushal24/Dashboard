@@ -155,11 +155,12 @@ links=pd.concat([bak_bse,enr_bse],axis=0)
 
 # ----- HTML with embedded JS -----
 overlay_html = f"""
-<div style="display: flex; gap: 40px;">
+<div style="display: flex;  flex-wrap: wrap; justify-content: center; gap: 40px;">
 
   <!-- Factory Map with Equipment Buttons -->
-  <div style="position: relative; width: 1500px; height: 1600px; background-image: url('{image_base64}'); background-size: contain; background-position: center; border: 2px solid #ccc;">
-"""
+  <div style="position: absolute; width: 1500px; height: 1600px; 
+      background-image: url('{image_base64}'); 
+      background-size: contain; background-position: center; border: 2px solid #ccc;">"""
 
 # Add equipment buttons
 for _, row in report1.iterrows():
