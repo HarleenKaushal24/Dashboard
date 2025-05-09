@@ -155,6 +155,7 @@ links=pd.concat([bak_bse,enr_bse],axis=0)
 
 # ----- HTML with embedded JS -----
 overlay_html = f"""
+<div style="width: 100%; overflow-x: auto;">
 <div style="width: 1600px; margin: 0 auto; display: flex; align-items: flex-start;">
 
   <!-- Factory Map with Equipment Buttons -->
