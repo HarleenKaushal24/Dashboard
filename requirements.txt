@@ -1,0 +1,7 @@
+streamlit
+smartsheet
+numpy
+pandas
+openpyxl
+requests
+office365-rest-python-client
