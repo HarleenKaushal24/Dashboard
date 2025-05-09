@@ -156,6 +156,7 @@ links=pd.concat([bak_bse,enr_bse],axis=0)
 # ----- HTML with embedded JS -----
 overlay_html = f"""
 <div style="overflow-x: auto; width: 100%;">
+<div style="display: flex; flex-direction: row; justify-content: center; gap: 0px;">
 
   <!-- Factory Map with Equipment Buttons -->
   <div style="position: relative; width: 1500px; height: 1600px; 
@@ -179,7 +180,8 @@ overlay_html += """
   </div>
 
   <!-- Side Options Panel -->
-  <div id="side-options" style="margin-top: 20px; padding: 20px; border-left: 2px solid #ccc; width: 400px; min-height: 200px;">
+  <div id="side-options" style="margin-top: 20px; padding: 20px;margin-left: 10px;box-sizing: border-box; 
+  border-left: 2px solid #ccc; width: 400px; min-height: 200px;">
     <p style="color: #777;">Click on an equipment button to see options here.</p>
   </div>
 
