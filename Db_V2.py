@@ -158,7 +158,7 @@ overlay_html = f"""
 <div style="display: flex;  flex-wrap: wrap; justify-content: center; gap: 40px;">
 
   <!-- Factory Map with Equipment Buttons -->
-  <div style="position: absolute; width: 1500px; height: 1600px; 
+  <div style="position: relative; width: 1500px; height: 1600px; 
       background-image: url('{image_base64}'); 
       background-size: contain; background-position: center; border: 2px solid #ccc;">"""
 
