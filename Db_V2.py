@@ -88,12 +88,13 @@ image_url="Images/Map.png"
 image_base64 = get_base64_image(image_url)
 
 # Load and encode image to base64
-with open("Images/spec_sheet.png", "rb") as f:
-    image_base64_spec = base64.b64encode(f.read()).decode()
-image_url1 = f"data:image/png;base64,{image_base64_spec}"
-#image_url1="Images/spec_sheet.png"
-#image_base64_spec = get_base64_image(image_url1)
-
+# with open("Images/spec_sheet.png", "rb") as f:
+#     image_base64_spec = base64.b64encode(f.read()).decode()
+# image_url1 = f"data:image/png;base64,{image_base64_spec}"
+image_url1="Images/spec_sheet.png"
+image_base64_spec = get_base64_image(image_url1)
+image_url2="Images/ss.png"
+image_base64_ss = get_base64_image(image_url2)
 
 bak_report=reports_data('BakingWhiteBoardReport')
 bak_report['Quantity Ahead/ Behind']=bak_report['Quantity Ahead/ Behind'].astype(float)
@@ -146,6 +147,7 @@ report1=pd.merge(dept_report, db,left_on="Equipment", right_on="Equip", how="rig
 #report1=report1[report1['Colour'].notna()]
 report1["Status"]=["Ahead by " if x >= 0 else "Behind by " for x in report1['Minutes Ahead/ Behind']]
 report1["Description"]=report1["Status"] + round(abs(report1["Minutes Ahead/ Behind"]),0).astype(str) +" minutes"
+report1["img1"]=image_base64_ss
 
 spec=sheets_data('SpecSheetLinks')
 
@@ -158,7 +160,7 @@ enr_bse['Dept']='Enrobing'
 enr_bse=pd.merge(enr_bse, spec,left_on=["BSE1",'Dept'], right_on=["BSE",'Dept'], how="left")
  
 links=pd.concat([bak_bse,enr_bse],axis=0)   
-links['img']=image_url1
+links['img']=image_base64_spec
 # ----- HTML with embedded JS -----
 overlay_html = f"""
 <div style="width: 100%; overflow-x: auto;">
@@ -173,7 +175,7 @@ overlay_html = f"""
 for _, row in report1.iterrows():
     overlay_html += f"""
     <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
-        <a href="javascript:void(0)" onclick="showOptions('{row['Equip']}', '{row['Db']}')"
+        <a href="javascript:void(0)" onclick="showOptions('{row['Equip']}', '{row['Db']}','{row['img1']}')"
             style="background: {row['Colour']}; padding: 6px 12px; border-radius: 26px;
                     text-decoration: none; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
             {row['Equip']}
@@ -205,23 +207,31 @@ overlay_html += """
    
     // Equipment descriptions from report1
     window.equipData = """ + json.dumps(
-        report1[['Equip', 'Description','Colour']].dropna().to_dict(orient="records")
+        report1[['Equip', 'Description','Colour','img1']].dropna().to_dict(orient="records")
     ) + """;
 
     // BSE spec data for all equipment
     window.bseData = """ + json.dumps(links[['Equipment', 'BSE', 'img','Links']].dropna().to_dict(orient="records")) + """;
 
     // Function to show dashboard and spec buttons in side panel
-    function showOptions(equip, link) {
+    function showOptions(equip, link,img1) {
         const panel = document.getElementById('side-options');
         panel.innerHTML = '<h4 style="margin-bottom: 10px; font-size: 30px;"> ' + equip + '</h4>';
         
         const dashBtn = document.createElement('button');
-        dashBtn.innerText = '📊 Smartsheet Dashboards';
-        dashBtn.style.fontSize = '25px';
-        dashBtn.style.marginBottom = '12px';
-        dashBtn.style.padding = '8px 14px';
-        dashBtn.style.background = '#ACDDDE';
+        dashBtn.innerText = 'Smartsheet Dashboards';
+        dashBtn.style.backgroundImage = `url('${img1}')`;
+        dashBtn.style.opacity = "0.8";
+        dashBtn.style.backgroundRepeat = "no-repeat";
+        dashBtn.style.backgroundSize = 'cover'; 
+        dashBtn.style.backgroundPosition = 'center'; 
+        dashBtn.style.width = '155px'; 
+        dashBtn.style.height = '90px';
+        dashBtn.style.fontSize = '20px';
+        dashBtn.style.fontWeight = "bold";
+        //dashBtn.style.marginBottom = '12px';
+        //dashBtn.style.padding = '8px 14px';
+        //dashBtn.style.background = '#ACDDDE';
         dashBtn.style.color = 'Black';
         dashBtn.style.border = 'none';
         dashBtn.style.borderRadius = '8px';
@@ -259,7 +269,7 @@ overlay_html += """
                 btn.style.padding = '10px';
                 
                 // Adding background image
-                btn.style.backgroundImage = "url('https://www.shutterstock.com/shutterstock/photos/2239154457/display_1500/stock-photo-digital-tablet-with-sample-spreadsheet-document-on-the-screen-2239154457.jpg')";
+                //btn.style.backgroundImage = "url('https://www.shutterstock.com/shutterstock/photos/2239154457/display_1500/stock-photo-digital-tablet-with-sample-spreadsheet-document-on-the-screen-2239154457.jpg')";
                 btn.style.backgroundImage = `url('${row.img}')`;
                 btn.style.opacity = "0.8";
                 btn.style.backgroundRepeat = "no-repeat";
@@ -283,7 +293,7 @@ overlay_html += """
         const descData = window.equipData.find(row => row.Equip === equip);
         if (descData) {
            const descBox = document.createElement('div');
-           descBox.innerText = '⌛Overall Status:' + descData.Description + '🕒';
+           descBox.innerText = '⌛Overall:' + descData.Description + '🕒';
            descBox.style.marginTop = '12px';
            descBox.style.padding = '10px 14px';
            descBox.style.background = descData.Colour;
@@ -291,6 +301,7 @@ overlay_html += """
            descBox.style.borderRadius = '8px';
            descBox.style.boxShadow = '1px 1px 3px rgba(0,0,0,0.1)';
            descBox.style.fontSize = '25px';
+           descBox.style.opacity = "0.5";
            // descBox.style.borderLeft = '4px solid #2857a7'; // accent strip
            panel.appendChild(descBox);
         }
