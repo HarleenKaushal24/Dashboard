@@ -86,8 +86,14 @@ st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (
 
 image_url="Images/Map.png"
 image_base64 = get_base64_image(image_url)
-image_url1="Images/spec_sheet.png"
-image_base64_spec = get_base64_image(image_url1)
+
+# Load and encode image to base64
+with open("Images/spec_sheet.png", "rb") as f:
+    image_base64_spec = base64.b64encode(f.read()).decode()
+image_url1 = f"data:image/png;base64,{image_base64_spec}"
+#image_url1="Images/spec_sheet.png"
+#image_base64_spec = get_base64_image(image_url1)
+
 
 bak_report=reports_data('BakingWhiteBoardReport')
 bak_report['Quantity Ahead/ Behind']=bak_report['Quantity Ahead/ Behind'].astype(float)
@@ -139,7 +145,7 @@ db = pd.DataFrame(dbs)
 report1=pd.merge(dept_report, db,left_on="Equipment", right_on="Equip", how="right")
 #report1=report1[report1['Colour'].notna()]
 report1["Status"]=["Ahead by " if x >= 0 else "Behind by " for x in report1['Minutes Ahead/ Behind']]
-report1["Description"]=report1["Status"] + round(report1["Minutes Ahead/ Behind"],0).astype(str) +" minutes"
+report1["Description"]=report1["Status"] + round(abs(report1["Minutes Ahead/ Behind"]),0).astype(str) +" minutes"
 
 spec=sheets_data('SpecSheetLinks')
 
@@ -152,7 +158,7 @@ enr_bse['Dept']='Enrobing'
 enr_bse=pd.merge(enr_bse, spec,left_on=["BSE1",'Dept'], right_on=["BSE",'Dept'], how="left")
  
 links=pd.concat([bak_bse,enr_bse],axis=0)   
-
+links['img']=image_url1
 # ----- HTML with embedded JS -----
 overlay_html = f"""
 <div style="width: 100%; overflow-x: auto;">
@@ -196,13 +202,14 @@ overlay_html += """
 </div>
 
 <script>
+   
     // Equipment descriptions from report1
     window.equipData = """ + json.dumps(
         report1[['Equip', 'Description','Colour']].dropna().to_dict(orient="records")
     ) + """;
 
     // BSE spec data for all equipment
-    window.bseData = """ + json.dumps(links[['Equipment', 'BSE', 'Links']].dropna().to_dict(orient="records")) + """;
+    window.bseData = """ + json.dumps(links[['Equipment', 'BSE', 'img','Links']].dropna().to_dict(orient="records")) + """;
 
     // Function to show dashboard and spec buttons in side panel
     function showOptions(equip, link) {
@@ -236,6 +243,14 @@ overlay_html += """
                 btn.style.justifyContent = 'center';
                 btn.style.color = 'black';
                 btn.style.fontSize = '20px';
+                btn.style.fontWeight = "bold";
+                btn.style.textDecoration = "underline"; // default (solid)
+                //btn.style.textDecorationStyle = "dotted";     // dotted underline
+                btn.style.textDecorationStyle = "dashed";     // dashed underline
+                //btn.style.textDecorationStyle = "double";     // double underline
+                //btn.style.textDecorationStyle = "wavy";       // wavy underline
+                btn.style.textDecorationColor = "black";       // custom underline color
+                btn.style.textDecorationThickness = "2px";    // custom thickness
                 btn.style.textAlign = 'center';
                 btn.style.border = 'none';
                 btn.style.borderRadius = '10px';
@@ -244,13 +259,15 @@ overlay_html += """
                 btn.style.padding = '10px';
                 
                 // Adding background image
-                btn.style.backgroundImage = "url('Images/Map.png')";
+                btn.style.backgroundImage = "url('https://www.shutterstock.com/shutterstock/photos/2239154457/display_1500/stock-photo-digital-tablet-with-sample-spreadsheet-document-on-the-screen-2239154457.jpg')";
+                btn.style.backgroundImage = `url('${row.img}')`;
+                btn.style.opacity = "0.8";
                 btn.style.backgroundRepeat = "no-repeat";
                 btn.style.backgroundSize = 'cover'; 
                 btn.style.backgroundPosition = 'center'; 
                 // Adjusting button size to match the rectangular image's aspect ratio
-                btn.style.width = '222px'; 
-                btn.style.height = '320px';
+                btn.style.width = '111px'; 
+                btn.style.height = '160px';
                 
                 btn.onclick = () => window.open(row.Links, '_blank');
                 panel.appendChild(btn);
