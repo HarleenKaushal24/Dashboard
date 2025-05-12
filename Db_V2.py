@@ -242,17 +242,17 @@ overlay_html += """
         const filtered = window.bseData.filter(row => row.Equipment === equip);
         if (filtered.length > 0) {
             const label = document.createElement('div');
-            // label.innerHTML = '<h5 style="margin-top: 20px;">Spec Sheets</h5>';
+            label.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Parameter Sheets:</h5>';
             panel.appendChild(label);
             filtered.forEach(row => {
                 const btn = document.createElement('button');
                 //Images/Spec.png
-                btn.innerText = ' Parameter Sheets ' + row.BSE;
+                btn.innerText =   row.BSE;
                 btn.style.display = 'flex';
                 btn.style.alignItems = 'center';
                 btn.style.justifyContent = 'center';
                 btn.style.color = 'black';
-                btn.style.fontSize = '20px';
+                btn.style.fontSize = '30px';
                 btn.style.fontWeight = "bold";
                 btn.style.textDecoration = "underline"; // default (solid)
                 //btn.style.textDecorationStyle = "dotted";     // dotted underline
@@ -265,7 +265,9 @@ overlay_html += """
                 btn.style.border = 'none';
                 btn.style.borderRadius = '10px';
                 btn.style.cursor = 'pointer';
-                btn.style.margin = '10px';
+                //btn.style.margin = '10px';
+                //btn.style.marginTop = '5px';
+                btn.style.marginBottom = '5px';
                 btn.style.padding = '10px';
                 
                 // Adding background image
