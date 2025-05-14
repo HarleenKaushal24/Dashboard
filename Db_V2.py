@@ -8,6 +8,7 @@ Created on Mon May  5 15:08:14 2025
 #pip install smartsheet-python-sdk
 import smartsheet
 import pandas as pd
+import numpy as np
 import streamlit as st
 from streamlit.components.v1 import html
 import base64
@@ -127,9 +128,21 @@ enr_sum_mach=enr_report.groupby(['Date','Equipment'])[['Quantity Ahead/ Behind',
 enr_report1=enr_sum_mach
 enr_report1["Colour"]= ["Green" if x >= 0 else "Red" for x in enr_sum_mach['Minutes Ahead/ Behind']]
 
-dept_report=pd.concat([bak_report1,enr_report1],axis=0)
+
+rb_report=reports_data('Robot Whiteboard Report')
+rb_report['Quantity Ahead/ Behind']=rb_report['Quantity Ahead/ Behind'].astype(float)
+rb_report['Minutes Ahead/ Behind']=rb_report['Minutes Ahead/ Behind'].astype(float)
+rb_report['BSE1'] = rb_report['Item Code']
+rb_report['Equipment']= "R"+ rb_report['Line'].astype(str)
+rb_sum_mach=rb_report.groupby(['Date','Equipment'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
+#enr_report1=pd.concat([enr_sum_mach,bak_sum_jan],axis=0)
+rb_report1=rb_sum_mach
+rb_report1["Colour"]= ["Green" if x >= 0 else "Red" for x in rb_sum_mach['Minutes Ahead/ Behind']]
+
+
+dept_report=pd.concat([bak_report1,enr_report1,rb_report1],axis=0)
 #Dashboard Links
-dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E5'],
+dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E5','R1','R2','R3'],
         'Db': ['https://app.smartsheet.com/b/publish?EQBCT=68d4a48e7f1145b2b01d2718523e0acd',
                'https://app.smartsheet.com/b/publish?EQBCT=5b843cc8d84c463db6cf4a46e303d65f',
                'https://app.smartsheet.com/b/publish?EQBCT=8a8434ebdf72462abc9d9dc7e53494f7',
@@ -138,9 +151,12 @@ dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E
                'https://app.smartsheet.com/b/publish?EQBCT=bc6438fd46d94ac588989a0e9837837a',
                'https://app.smartsheet.com/b/publish?EQBCT=0b9711dc34c84f839627f7440c967f9c',
                'https://app.smartsheet.com/b/publish?EQBCT=2d1535f74b874cc4a06d2905b99853c1',
-               'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c'],
-        'x':[600,800,655,755,480,420,380,320,260],
-        'y':[1040,1040,1090,1090,890,840,890,840,890]}
+               'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c',
+               'https://app.smartsheet.com/b/publish?EQBCT=bdd655650d9646a6a5608b224086e128',
+               'https://app.smartsheet.com/b/publish?EQBCT=9dce60cfe82f4ed4baed99325b61c250',
+               'https://app.smartsheet.com/b/publish?EQBCT=1f42c61dfbe54c3ab6852db9080cd516'],
+        'x':[600,800,655,755,480,420,380,320,260,480,400,320],
+        'y':[1040,1040,1090,1090,890,840,890,840,890,600,600,600]}
 
 db = pd.DataFrame(dbs)
 report1=pd.merge(dept_report, db,left_on="Equipment", right_on="Equip", how="right")
@@ -150,6 +166,7 @@ report1["Description"]=report1["Status"] + round(abs(report1["Minutes Ahead/ Beh
 report1["img1"]=image_base64_ss
 
 spec=sheets_data('SpecSheetLinks')
+spec_rb=sheets_data('RobotParameterSheets')
 
 bak_bse=bak_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
 bak_bse['Dept']='Baking'
@@ -158,8 +175,12 @@ bak_bse=pd.merge(bak_bse, spec,left_on=["BSE1",'Dept'], right_on=["BSE",'Dept'],
 enr_bse=enr_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
 enr_bse['Dept']='Enrobing'
 enr_bse=pd.merge(enr_bse, spec,left_on=["BSE1",'Dept'], right_on=["BSE",'Dept'], how="left")
+
+rb_fin=rb_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
+rb_fin['Dept']='Robot'
+rb_fin=pd.merge(rb_fin, spec_rb,left_on=["BSE1",'Dept'], right_on=["FINS",'Dept'], how="left")
  
-links=pd.concat([bak_bse,enr_bse],axis=0)   
+links=pd.concat([bak_bse,enr_bse,rb_fin],axis=0)   
 links['img']=image_base64_spec
 # ----- HTML with embedded JS -----
 overlay_html = f"""
@@ -211,7 +232,7 @@ overlay_html += """
     ) + """;
 
     // BSE spec data for all equipment
-    window.bseData = """ + json.dumps(links[['Equipment', 'BSE', 'img','Links']].dropna().to_dict(orient="records")) + """;
+    window.bseData = """ + json.dumps(links[['Equipment', 'BSE1', 'img','Links']].dropna().to_dict(orient="records")) + """;
 
     // Function to show dashboard and spec buttons in side panel
     function showOptions(equip, link,img1) {
@@ -247,7 +268,7 @@ overlay_html += """
             filtered.forEach(row => {
                 const btn = document.createElement('button');
                 //Images/Spec.png
-                btn.innerText =   row.BSE;
+                btn.innerText =   row.BSE1;
                 btn.style.display = 'flex';
                 btn.style.alignItems = 'center';
                 btn.style.justifyContent = 'center';
@@ -277,7 +298,7 @@ overlay_html += """
                 btn.style.backgroundRepeat = "no-repeat";
                 btn.style.backgroundSize = 'cover'; 
                 btn.style.backgroundPosition = 'center'; 
-                // Adjusting button size to match the rectangular image's aspect ratio
+                // Adjusting button size to match the image's aspect ratio
                 btn.style.width = '111px'; 
                 btn.style.height = '160px';
                 
