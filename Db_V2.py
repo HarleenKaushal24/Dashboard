@@ -96,6 +96,13 @@ image_url1="Images/spec_sheet.png"
 image_base64_spec = get_base64_image(image_url1)
 image_url2="Images/ss.png"
 image_base64_ss = get_base64_image(image_url2)
+image_url3="Images/spec_rbt.png"
+image_base64_spec_r = get_base64_image(image_url3)
+image_url4="Images/spec_pkg.png"
+image_base64_spec_p = get_base64_image(image_url4)
+image_url5="Images/logo.png"
+logo = get_base64_image(image_url5)
+
 
 bak_report=reports_data('BakingWhiteBoardReport')
 bak_report['Quantity Ahead/ Behind']=bak_report['Quantity Ahead/ Behind'].astype(float)
@@ -139,14 +146,27 @@ rb_sum_mach=rb_report.groupby(['Date','Equipment'])[['Quantity Ahead/ Behind','M
 rb_report1=rb_sum_mach
 rb_report1["Colour"]= ["Green" if x >= 0 else "Red" for x in rb_sum_mach['Minutes Ahead/ Behind']]
 
+pk_report=reports_data('PackingWhiteBoardReport')
+pk_report['Quantity Ahead/ Behind']=pk_report['Quantity Ahead/ Behind'].astype(float)
+pk_report['Minutes Ahead/ Behind']=pk_report['Minutes Ahead/ Behind'].astype(float)
+pk_report['BSE1'] = pk_report['ItemName']
+pk_report['Equipment']= "P"+ pk_report['Line'].astype(str)
+pk_sum_mach=pk_report.groupby(['Date','Equipment'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
+#enr_report1=pd.concat([enr_sum_mach,bak_sum_jan],axis=0)
+pk_report1=pk_sum_mach
+pk_report1["Colour"]= ["Green" if x >= 0 else "Red" for x in pk_report1['Minutes Ahead/ Behind']]
 
-dept_report=pd.concat([bak_report1,enr_report1,rb_report1],axis=0)
+
+
+dept_report=pd.concat([bak_report1,enr_report1,rb_report1,pk_report1],axis=0)
 #Dashboard Links
-dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E5','R1','R2','R3'],
+dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen', 'Frozen Yogurt','E1','E2','E3','E4','E5','R1','R2','R3','P1',
+               'P2','P3','P4','P5'],
         'Db': ['https://app.smartsheet.com/b/publish?EQBCT=68d4a48e7f1145b2b01d2718523e0acd',
                'https://app.smartsheet.com/b/publish?EQBCT=5b843cc8d84c463db6cf4a46e303d65f',
                'https://app.smartsheet.com/b/publish?EQBCT=8a8434ebdf72462abc9d9dc7e53494f7',
                'https://app.smartsheet.com/b/publish?EQBCT=452450ac6b0a4584b9b427848083253a',
+               'https://app.smartsheet.com/b/publish?EQBCT=8d9616a3f51a432cb033a0d4a02c9ffa',
                'https://app.smartsheet.com/b/publish?EQBCT=5f0b2f98993745629eb15614336b61ad',
                'https://app.smartsheet.com/b/publish?EQBCT=bc6438fd46d94ac588989a0e9837837a',
                'https://app.smartsheet.com/b/publish?EQBCT=0b9711dc34c84f839627f7440c967f9c',
@@ -154,9 +174,14 @@ dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen','E1','E2','E3','E4','E
                'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c',
                'https://app.smartsheet.com/b/publish?EQBCT=bdd655650d9646a6a5608b224086e128',
                'https://app.smartsheet.com/b/publish?EQBCT=9dce60cfe82f4ed4baed99325b61c250',
-               'https://app.smartsheet.com/b/publish?EQBCT=1f42c61dfbe54c3ab6852db9080cd516'],
-        'x':[600,800,655,755,480,420,380,320,260,480,400,320],
-        'y':[1040,1040,1090,1090,890,840,890,840,890,600,600,600]}
+               'https://app.smartsheet.com/b/publish?EQBCT=1f42c61dfbe54c3ab6852db9080cd516',
+               'https://app.smartsheet.com/b/publish?EQBCT=d7a42d313d4045db95d53ce760d0846a',
+               'https://app.smartsheet.com/b/publish?EQBCT=9840fc9707c74cf08f4599ecc066b568',
+               'https://app.smartsheet.com/b/publish?EQBCT=1ae547ca4cd4462885e4ec920ab0e539',
+               'https://app.smartsheet.com/b/publish?EQBCT=97d08666bb6b4c718ef970068038e7cd',
+               'https://app.smartsheet.com/b/publish?EQBCT=928aab297b2045378263e28e7a83b090'],
+        'x':[600,685,645,785,745,480,420,380,320,260,480,400,320,460,390,310,270,180],
+        'y':[1040,1040,1090,1040,1090,890,840,890,840,890,600,600,600,400,350,400,350,400]}
 
 db = pd.DataFrame(dbs)
 report1=pd.merge(dept_report, db,left_on="Equipment", right_on="Equip", how="right")
@@ -167,6 +192,7 @@ report1["img1"]=image_base64_ss
 
 spec=sheets_data('SpecSheetLinks')
 spec_rb=sheets_data('RobotParameterSheets')
+spec_pk=sheets_data('PackingSpec')
 
 bak_bse=bak_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
 bak_bse['Dept']='Baking'
@@ -180,8 +206,21 @@ rb_fin=rb_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind',
 rb_fin['Dept']='Robot'
 rb_fin=pd.merge(rb_fin, spec_rb,left_on=["BSE1",'Dept'], right_on=["FINS",'Dept'], how="left")
  
-links=pd.concat([bak_bse,enr_bse,rb_fin],axis=0)   
-links['img']=image_base64_spec
+pk_itm=pk_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
+pk_itm['Dept']='Packing'
+pk_itm=pd.merge(pk_itm, spec_pk,left_on=["BSE1",'Dept'], right_on=["ITMS",'Dept'], how="left")
+ 
+
+links=pd.concat([bak_bse,enr_bse,rb_fin,pk_itm],axis=0)   
+#links['img']=image_base64_spec
+links['img'] = [
+    image_base64_spec_p if x[0] == "P" 
+    else image_base64_spec_r if x[0] == "R" 
+    else image_base64_spec 
+    for x in links['Equipment']
+]
+
+link_url = "https://www.boscoandroxys.com/"
 # ----- HTML with embedded JS -----
 overlay_html = f"""
 <div style="width: 100%; overflow-x: auto;">
@@ -334,6 +373,18 @@ overlay_html += """
 </script>
 """
 
+
+logo_html = f"""
+<div style="position: fixed; top: 10px; right: 20px; z-index: 1000;">
+    <a href="{link_url}" target="_blank">
+        <img src="{logo}" alt="Company Logo" style="height: 100px;">
+    </a>
+</div>
+"""
+
+
+
+
 # Render to Streamlit
-html(overlay_html, height=1800)
+html(logo_html +overlay_html, height=1800)
 
