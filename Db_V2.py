@@ -79,10 +79,18 @@ def extract_bse(val):
             return val
     return str(int(val)) if float(val).is_integer() else str(int(float(val)))
 
+
+image_url5="Images/logo.png"
+logo = get_base64_image(image_url5)
 # Streamlit page setup
 st.set_page_config(layout="wide")
-st.title("Factory Map")
-
+#st.title("Factory Map")
+col1, col2 = st.columns([1,20])
+with col1:
+    st.image(logo, width=100)  # Adjust path and size as needed
+with col2:
+    st.title("Factory Map")
+    
 st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (1 second=1000 milliseconds)
 
 image_url="Images/Map.png"
@@ -100,8 +108,7 @@ image_url3="Images/spec_rbt.png"
 image_base64_spec_r = get_base64_image(image_url3)
 image_url4="Images/spec_pkg.png"
 image_base64_spec_p = get_base64_image(image_url4)
-image_url5="Images/logo.png"
-logo = get_base64_image(image_url5)
+
 
 
 bak_report=reports_data('BakingWhiteBoardReport')
@@ -374,17 +381,17 @@ overlay_html += """
 """
 
 
-logo_html = f"""
-<div style="position: fixed; top: 10px; right: 20px; z-index: 1000;">
-    <a href="{link_url}" target="_blank">
-        <img src="{logo}" alt="Company Logo" style="height: 100px;">
-    </a>
-</div>
-"""
+# logo_html = f"""
+# <div style="position: fixed; top: 10px; right: 20px; z-index: 1000;">
+#     <a href="{link_url}" target="_blank">
+#         <img src="{logo}" alt="Company Logo" style="height: 100px;">
+#     </a>
+# </div>
+# """
 
 
 
 
 # Render to Streamlit
-html(logo_html +overlay_html, height=1800)
+html(overlay_html, height=1800)
 
