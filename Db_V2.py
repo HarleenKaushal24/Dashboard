@@ -110,7 +110,10 @@ image_url4="Images/spec_pkg.png"
 image_base64_spec_p = get_base64_image(image_url4)
 image_url6="Images/diag.png"
 image_base64_diag = get_base64_image(image_url6)
-
+image_url7="Images/bse.png"
+image_base64_bse = get_base64_image(image_url7)
+image_url8="Images/cot.png"
+image_base64_cot = get_base64_image(image_url8)
 
 bak_report=reports_data('BakingWhiteBoardReport')
 bak_report['Quantity Ahead/ Behind']=bak_report['Quantity Ahead/ Behind'].astype(float)
@@ -202,6 +205,7 @@ spec=sheets_data('SpecSheetLinks')
 spec_rb=sheets_data('RobotParameterSheets')
 spec_pk=sheets_data('PackingSpec')
 diag_pk=sheets_data('PackingDiagrams')
+cot_enr=sheets_data('EnrobingSpecs')
 
 bak_bse=bak_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
 bak_bse['Dept']='Baking'
@@ -218,24 +222,31 @@ rb_fin=pd.merge(rb_fin, spec_rb,left_on=["BSE1",'Dept'], right_on=["FINS",'Dept'
 pk_itm=pk_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
 pk_itm['Dept']='Packing'
 pk_itm=pd.merge(pk_itm, spec_pk,left_on=["BSE1",'Dept'], right_on=["ITMS",'Dept'], how="left")
- 
+pk_itm['Dept']='Spec'
 
 links=pd.concat([bak_bse,enr_bse,rb_fin,pk_itm],axis=0)   
 #links['img']=image_base64_spec
 links['img'] = [
     image_base64_spec_p if x[0] == "P" 
     else image_base64_spec_r if x[0] == "R" 
-    else image_base64_spec 
+    else image_base64_spec if x[0] == "E"
+    else image_base64_bse 
     for x in links['Equipment']
 ]
 
 diag=pk_report[['Equipment','Packing Diagram']].drop_duplicates()
 diag.rename(columns={'Packing Diagram': 'BSE1'}, inplace=True)
 diag1=pd.merge(diag, diag_pk, left_on='BSE1', right_on="DiagramCode", how='left')
-diag1['Dept']="PD"
+diag1['Dept']="Packing"
 diag1['img']=image_base64_diag
 
-links=pd.concat([links,diag1],axis=0)  
+cots=enr_report[['Equipment','Item Code']].drop_duplicates()
+cots.rename(columns={'Item Code': 'BSE1'}, inplace=True)
+cots1=pd.merge(cots, cot_enr, left_on='BSE1', right_on="Cots", how='left')
+cots1['Dept']="Spec"
+cots1['img']=image_base64_cot
+
+links=pd.concat([links,diag1,cots1],axis=0)  
 
 link_url = "https://www.boscoandroxys.com/"
 
@@ -320,7 +331,7 @@ overlay_html += """
         panel.appendChild(dashBtn);
         
 
-        const filtered = window.bseData.filter(row => row.Equipment === equip && row.Dept !== 'PD');
+        const filtered = window.bseData.filter(row => row.Equipment === equip && row.Dept !== 'Spec');
         if (filtered.length > 0) {
             const label = document.createElement('div');
             label.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Parameter Sheets:</h5>';
@@ -370,10 +381,10 @@ overlay_html += """
             panel.appendChild(msg);
         }
             
-        const filtered1 = window.bseData.filter(row => row.Equipment === equip && row.Dept === 'PD');
+        const filtered1 = window.bseData.filter(row => row.Equipment === equip && row.Dept === 'Spec');
         if (filtered1.length > 0) {
             const label1 = document.createElement('div');
-            label1.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Packing Diagrams:</h5>';
+            label1.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Specification Sheets:</h5>';
             panel.appendChild(label1);
             filtered1.forEach(row => {
                 const btn1 = document.createElement('button');
@@ -382,7 +393,7 @@ overlay_html += """
                 btn1.style.alignItems = 'center';
                 btn1.style.justifyContent = 'center';
                 btn1.style.color = 'black';
-                btn1.style.fontSize = '30px';
+                btn1.style.fontSize = '20px';
                 btn1.style.fontWeight = "bold";
                 btn1.style.textDecoration = "underline"; // default (solid)
                 btn1.style.textDecorationStyle = "dashed";     // dashed underline
@@ -390,10 +401,17 @@ overlay_html += """
                 btn1.style.textDecorationThickness = "2px";    // custom thickness
                 btn1.style.textAlign = 'center';
                 btn1.style.border = 'none';
-                btn1.style.borderRadius = '10px';
+                btn1.style.borderRadius = '1px';
                 btn1.style.cursor = 'pointer';
-                btn1.style.marginBottom = '5px';
-                btn1.style.padding = '10px';
+                btn1.style.marginBottom = '1px';
+                btn1.style.padding = '1px';
+                
+                btn1.style.whiteSpace = 'normal';
+                btn1.style.width = '100%';
+                btn1.style.maxWidth = '100%';
+                btn1.style.overflow = 'visible';
+                btn1.style.wordBreak = 'break-word';
+                btn1.style.lineHeight = '1.2';
                 
                 // Adding background image
                 btn1.style.backgroundImage = `url('${row.img}')`;
