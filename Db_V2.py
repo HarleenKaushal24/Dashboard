@@ -108,7 +108,8 @@ image_url3="Images/spec_rbt.png"
 image_base64_spec_r = get_base64_image(image_url3)
 image_url4="Images/spec_pkg.png"
 image_base64_spec_p = get_base64_image(image_url4)
-
+image_url6="Images/diag.png"
+image_base64_diag = get_base64_image(image_url6)
 
 
 bak_report=reports_data('BakingWhiteBoardReport')
@@ -167,26 +168,26 @@ pk_report1["Colour"]= ["Green" if x >= 0 else "Red" for x in pk_report1['Minutes
 
 dept_report=pd.concat([bak_report1,enr_report1,rb_report1,pk_report1],axis=0)
 #Dashboard Links
-dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen', 'Frozen Yogurt','E1','E2','E3','E4','E5','R1','R2','R3','P1',
+dbs={'Equip': ['Cutter','Waterjet', 'Depositor','Janssen', 'Frozen Yogurt','E1','E2','E5','E3','E4','R1','R2','R3','P1',
                'P2','P3','P4','P5'],
-        'Db': ['https://app.smartsheet.com/b/publish?EQBCT=68d4a48e7f1145b2b01d2718523e0acd',
-               'https://app.smartsheet.com/b/publish?EQBCT=5b843cc8d84c463db6cf4a46e303d65f',
-               'https://app.smartsheet.com/b/publish?EQBCT=8a8434ebdf72462abc9d9dc7e53494f7',
-               'https://app.smartsheet.com/b/publish?EQBCT=452450ac6b0a4584b9b427848083253a',
-               'https://app.smartsheet.com/b/publish?EQBCT=8d9616a3f51a432cb033a0d4a02c9ffa',
-               'https://app.smartsheet.com/b/publish?EQBCT=5f0b2f98993745629eb15614336b61ad',
-               'https://app.smartsheet.com/b/publish?EQBCT=bc6438fd46d94ac588989a0e9837837a',
-               'https://app.smartsheet.com/b/publish?EQBCT=0b9711dc34c84f839627f7440c967f9c',
-               'https://app.smartsheet.com/b/publish?EQBCT=2d1535f74b874cc4a06d2905b99853c1',
-               'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c',
-               'https://app.smartsheet.com/b/publish?EQBCT=bdd655650d9646a6a5608b224086e128',
-               'https://app.smartsheet.com/b/publish?EQBCT=9dce60cfe82f4ed4baed99325b61c250',
-               'https://app.smartsheet.com/b/publish?EQBCT=1f42c61dfbe54c3ab6852db9080cd516',
-               'https://app.smartsheet.com/b/publish?EQBCT=d7a42d313d4045db95d53ce760d0846a',
-               'https://app.smartsheet.com/b/publish?EQBCT=9840fc9707c74cf08f4599ecc066b568',
-               'https://app.smartsheet.com/b/publish?EQBCT=1ae547ca4cd4462885e4ec920ab0e539',
-               'https://app.smartsheet.com/b/publish?EQBCT=97d08666bb6b4c718ef970068038e7cd',
-               'https://app.smartsheet.com/b/publish?EQBCT=928aab297b2045378263e28e7a83b090'],
+        'Db': ['https://app.smartsheet.com/b/publish?EQBCT=68d4a48e7f1145b2b01d2718523e0acd',#C
+               'https://app.smartsheet.com/b/publish?EQBCT=5b843cc8d84c463db6cf4a46e303d65f',#W
+               'https://app.smartsheet.com/b/publish?EQBCT=8a8434ebdf72462abc9d9dc7e53494f7',#D
+               'https://app.smartsheet.com/b/publish?EQBCT=452450ac6b0a4584b9b427848083253a',#J
+               'https://app.smartsheet.com/b/publish?EQBCT=8d9616a3f51a432cb033a0d4a02c9ffa',#FY
+               'https://app.smartsheet.com/b/publish?EQBCT=5f0b2f98993745629eb15614336b61ad',#E1
+               'https://app.smartsheet.com/b/publish?EQBCT=bc6438fd46d94ac588989a0e9837837a',#E2
+               'https://app.smartsheet.com/b/publish?EQBCT=e878059ed284453c943b603196c8f05c',#E5
+               'https://app.smartsheet.com/b/publish?EQBCT=0b9711dc34c84f839627f7440c967f9c',#E3
+               'https://app.smartsheet.com/b/publish?EQBCT=2d1535f74b874cc4a06d2905b99853c1',#E4              
+               'https://app.smartsheet.com/b/publish?EQBCT=bdd655650d9646a6a5608b224086e128',#R1
+               'https://app.smartsheet.com/b/publish?EQBCT=9dce60cfe82f4ed4baed99325b61c250',#R2
+               'https://app.smartsheet.com/b/publish?EQBCT=1f42c61dfbe54c3ab6852db9080cd516',#R3
+               'https://app.smartsheet.com/b/publish?EQBCT=d7a42d313d4045db95d53ce760d0846a',#P1
+               'https://app.smartsheet.com/b/publish?EQBCT=9840fc9707c74cf08f4599ecc066b568',#P2
+               'https://app.smartsheet.com/b/publish?EQBCT=1ae547ca4cd4462885e4ec920ab0e539',#P3
+               'https://app.smartsheet.com/b/publish?EQBCT=97d08666bb6b4c718ef970068038e7cd',#P4
+               'https://app.smartsheet.com/b/publish?EQBCT=928aab297b2045378263e28e7a83b090'],#P5
         'x':[600,685,645,785,745,480,420,380,320,260,480,400,320,460,390,310,270,180],
         'y':[1040,1040,1090,1040,1090,890,840,890,840,890,600,600,600,400,350,400,350,400]}
 
@@ -200,6 +201,7 @@ report1["img1"]=image_base64_ss
 spec=sheets_data('SpecSheetLinks')
 spec_rb=sheets_data('RobotParameterSheets')
 spec_pk=sheets_data('PackingSpec')
+diag_pk=sheets_data('PackingDiagrams')
 
 bak_bse=bak_report.groupby(['Date','Equipment','BSE1'])[['Quantity Ahead/ Behind','Minutes Ahead/ Behind']].sum().reset_index()
 bak_bse['Dept']='Baking'
@@ -227,8 +229,18 @@ links['img'] = [
     for x in links['Equipment']
 ]
 
+diag=pk_report[['Equipment','Packing Diagram']].drop_duplicates()
+diag.rename(columns={'Packing Diagram': 'BSE1'}, inplace=True)
+diag1=pd.merge(diag, diag_pk, left_on='BSE1', right_on="DiagramCode", how='left')
+diag1['Dept']="PD"
+diag1['img']=image_base64_diag
+
+links=pd.concat([links,diag1],axis=0)  
+
 link_url = "https://www.boscoandroxys.com/"
+
 # ----- HTML with embedded JS -----
+#<div style="width: 100%; overflow-x: auto;">
 overlay_html = f"""
 <div style="width: 100%; overflow-x: auto;">
 <div style="width: 1600px; margin: 0 auto; display: flex; align-items: flex-start;">
@@ -255,7 +267,7 @@ overlay_html += """
   </div>
 
   <!-- Side Options Panel -->
-  <div id="side-options" style="
+  <div id="side-options" tabindex="0" style="
     width: 400px;
     max-height: 1600px;
     overflow-y: auto;
@@ -278,13 +290,14 @@ overlay_html += """
     ) + """;
 
     // BSE spec data for all equipment
-    window.bseData = """ + json.dumps(links[['Equipment', 'BSE1', 'img','Links']].dropna().to_dict(orient="records")) + """;
+    window.bseData = """ + json.dumps(links[['Equipment', 'BSE1', 'img','Links','Dept']].dropna().to_dict(orient="records")) + """;
 
     // Function to show dashboard and spec buttons in side panel
     function showOptions(equip, link,img1) {
-        const panel = document.getElementById('side-options');
+        const panel = document.getElementById('side-options');         
         panel.innerHTML = '<h4 style="margin-bottom: 10px; font-size: 30px;"> ' + equip + '</h4>';
-        
+        panel.focus();
+        panel.scrollIntoView({ behavior: 'smooth' });
         const dashBtn = document.createElement('button');
         dashBtn.innerText = 'Smartsheet Dashboards';
         dashBtn.style.backgroundImage = `url('${img1}')`;
@@ -305,15 +318,15 @@ overlay_html += """
         dashBtn.style.cursor = 'pointer';
         dashBtn.onclick = () => window.open(link, '_blank');
         panel.appendChild(dashBtn);
+        
 
-        const filtered = window.bseData.filter(row => row.Equipment === equip);
+        const filtered = window.bseData.filter(row => row.Equipment === equip && row.Dept !== 'PD');
         if (filtered.length > 0) {
             const label = document.createElement('div');
             label.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Parameter Sheets:</h5>';
             panel.appendChild(label);
             filtered.forEach(row => {
                 const btn = document.createElement('button');
-                //Images/Spec.png
                 btn.innerText =   row.BSE1;
                 btn.style.display = 'flex';
                 btn.style.alignItems = 'center';
@@ -353,10 +366,53 @@ overlay_html += """
             });
         } else {
             const msg = document.createElement('p');
-            msg.innerText = 'No specs found for this equipment.';
+            msg.innerText = 'No parameter sheets found for this equipment.';
             panel.appendChild(msg);
         }
             
+        const filtered1 = window.bseData.filter(row => row.Equipment === equip && row.Dept === 'PD');
+        if (filtered1.length > 0) {
+            const label1 = document.createElement('div');
+            label1.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Packing Diagrams:</h5>';
+            panel.appendChild(label1);
+            filtered1.forEach(row => {
+                const btn1 = document.createElement('button');
+                btn1.innerText =   row.BSE1;
+                btn1.style.display = 'flex';
+                btn1.style.alignItems = 'center';
+                btn1.style.justifyContent = 'center';
+                btn1.style.color = 'black';
+                btn1.style.fontSize = '30px';
+                btn1.style.fontWeight = "bold";
+                btn1.style.textDecoration = "underline"; // default (solid)
+                btn1.style.textDecorationStyle = "dashed";     // dashed underline
+                btn1.style.textDecorationColor = "black";       // custom underline color
+                btn1.style.textDecorationThickness = "2px";    // custom thickness
+                btn1.style.textAlign = 'center';
+                btn1.style.border = 'none';
+                btn1.style.borderRadius = '10px';
+                btn1.style.cursor = 'pointer';
+                btn1.style.marginBottom = '5px';
+                btn1.style.padding = '10px';
+                
+                // Adding background image
+                btn1.style.backgroundImage = `url('${row.img}')`;
+                btn1.style.opacity = "0.8";
+                btn1.style.backgroundRepeat = "no-repeat";
+                btn1.style.backgroundSize = 'cover'; 
+                btn1.style.backgroundPosition = 'center'; 
+                // Adjusting button size to match the image's aspect ratio
+                btn1.style.width = '111px'; 
+                btn1.style.height = '160px';
+                
+                btn1.onclick = () => window.open(row.Links, '_blank');
+                panel.appendChild(btn1);
+            });
+        } else {
+            const msg1 = document.createElement('p');
+            msg1.innerText = '';
+            panel.appendChild(msg1);
+        }
             
          // Show description
         const descData = window.equipData.find(row => row.Equip === equip);
