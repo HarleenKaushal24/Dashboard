@@ -200,6 +200,7 @@ report1=pd.merge(dept_report, db,left_on="Equipment", right_on="Equip", how="rig
 report1["Status"]=["Ahead by " if x >= 0 else "Behind by " for x in report1['Minutes Ahead/ Behind']]
 report1["Description"]=report1["Status"] + round(abs(report1["Minutes Ahead/ Behind"]),0).astype(str) +" minutes"
 report1["img1"]=image_base64_ss
+report1['Colour'] = report1['Colour'].fillna('Blue')
 
 spec=sheets_data('SpecSheetLinks')
 spec_rb=sheets_data('RobotParameterSheets')
