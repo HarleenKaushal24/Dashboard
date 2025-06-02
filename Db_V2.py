@@ -300,15 +300,15 @@ OpenA=round(av_A*100/(oc_A + av_A),0)
 OpenB=round(av_B*100/(oc_B + av_B),0)
 OpenC=round(av_C*100/(oc_B + av_C),0)
 
-db_A={'Spaces': ['A','B', 'C'],
+db_A={'Spaces': ['C','B', 'A'],
         'x':[900,900,900],
         'y':[275,470,650],
-      'AvailableSpaces': [av_A, av_B, av_C]}
+      'AvailableSpaces': [av_C, av_B, av_A]}
 
 db_O={'Spaces': ['A','B', 'C'],
         'x':[750,750,750],
         'y':[275,470,650],
-      'OccupiedSpaces': [oc_A, oc_B, oc_C]}
+      'OccupiedSpaces': [oc_C, oc_B, oc_A]}
 
 df_A = pd.DataFrame(db_A)
 df_A['Colour']="#8B8000"
@@ -352,7 +352,7 @@ overlay_html += f"""
 <div style="position: absolute; top: 180px; left: 800px;">
 <div style="background: purple; padding: 6px 12px; border-radius: 20px;
   text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-  Space A (Open: {OpenA} %)
+  Space C (Open: {OpenC} %)
     </div>
 </div>
 """
@@ -370,7 +370,7 @@ overlay_html += f"""
 <div style="position: absolute; top: 561px; left: 800px;">
 <div style="background: blue; padding: 6px 12px; border-radius: 20px;
   text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-  Space C (Open: {OpenC} %)
+  Space A (Open: {OpenA} %)
     </div>
 </div>
 """
