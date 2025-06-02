@@ -14,6 +14,7 @@ from streamlit.components.v1 import html
 import base64
 from streamlit_autorefresh import st_autorefresh
 import json
+import requests
 
 token = st.secrets["smartsheet"]["token"]
 
@@ -251,6 +252,70 @@ links=pd.concat([links,diag1,cots1],axis=0)
 
 link_url = "https://www.boscoandroxys.com/"
 
+###########################################################################
+##bubble app api
+
+w_key = st.secrets["bubble"]["w_key"]
+url_w = st.secrets["bubble"]["url_w"]
+headers_w = {
+   'X-API-Key':w_key
+}
+
+all_results = []
+cursor = 0
+limit = 100
+
+while True:
+    params = {
+        'cursor': cursor,
+        'limit': limit
+    }
+    response = requests.get(url_w, headers=headers_w, params=params)
+    data = response.json()
+    results = data.get('response', {}).get('results', [])
+    
+    if not results:
+        break
+
+    all_results.extend(results)
+    cursor += limit  
+
+df = pd.DataFrame(all_results)
+df_A= df[df['Location Code'].str.startswith('A', na=False)]
+df_B= df[df['Location Code'].str.startswith('B', na=False)]
+df_C= df[df['Location Code'].str.startswith('C', na=False)]
+
+av_A=df_A['Raw Materials Skid'].isna().sum()
+av_B=df_B['Raw Materials Skid'].isna().sum()
+av_C=df_C['Raw Materials Skid'].isna().sum()
+Open=av_A + av_B + av_C
+
+
+oc_A= df_A.shape[0] - df_A['Raw Materials Skid'].isna().sum()
+oc_B= df_B.shape[0] - df_B['Raw Materials Skid'].isna().sum()
+oc_C= df_C.shape[0] - df_C['Raw Materials Skid'].isna().sum()
+
+OpenP=round(Open*100/(oc_A + oc_B + oc_C + Open),0)
+OpenA=round(av_A*100/(oc_A + av_A),0)
+OpenB=round(av_B*100/(oc_B + av_B),0)
+OpenC=round(av_C*100/(oc_B + av_C),0)
+
+db_A={'Spaces': ['A','B', 'C'],
+        'x':[1150,1150,1150],
+        'y':[275,470,650],
+      'AvailableSpaces': [av_A, av_B, av_C]}
+
+db_O={'Spaces': ['A','B', 'C'],
+        'x':[1000,1000,1000],
+        'y':[275,470,650],
+      'OccupiedSpaces': [oc_A, oc_B, oc_C]}
+
+df_A = pd.DataFrame(db_A)
+df_A['Colour']="#8B8000"
+df_O = pd.DataFrame(db_O)
+df_O['Colour']="#848884"
+
+###########################################################################
 # ----- HTML with embedded JS -----
 #<div style="width: 100%; overflow-x: auto;">
 overlay_html = f"""
@@ -454,6 +519,64 @@ overlay_html += """
     }
 </script>
 """
+overlay_html += f"""
+        <div style="position: absolute; top: 130px; left: 1000px;">
+        <div style="background: #8B8000; padding: 6px 12px; border-radius: 20px;
+         text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+         Total Open Spaces: {Open} ({OpenP} %)
+            </div>
+        </div>
+        """
+        
+overlay_html += f"""
+<div style="position: absolute; top: 190px; left: 1050px;">
+<div style="background: purple; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space A (Open: {OpenA} %)
+    </div>
+</div>
+"""
+
+overlay_html += f"""
+<div style="position: absolute; top: 380px; left: 1050px;">
+<div style="background: magenta; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space B (Open: {OpenB} %)
+    </div>
+</div>
+"""
+
+overlay_html += f"""
+<div style="position: absolute; top: 570px; left: 1050px;">
+<div style="background: blue; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space C (Open: {OpenC} %)
+    </div>
+</div>
+"""
+
+for _, row in df_A.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
+     text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+     Open: {row['AvailableSpaces']}
+        </div>
+    </div>
+    """
+for _, row in df_O.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
+     text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+     Occupied: {row['OccupiedSpaces']}
+        </div>
+    </div>
+    """
+
+    
+
+overlay_html += "</div>"
 
 
 # logo_html = f"""
