@@ -301,12 +301,12 @@ OpenB=round(av_B*100/(oc_B + av_B),0)
 OpenC=round(av_C*100/(oc_B + av_C),0)
 
 db_A={'Spaces': ['A','B', 'C'],
-        'x':[1150,1150,1150],
+        'x':[900,900,900],
         'y':[275,470,650],
       'AvailableSpaces': [av_A, av_B, av_C]}
 
 db_O={'Spaces': ['A','B', 'C'],
-        'x':[1000,1000,1000],
+        'x':[750,750,750],
         'y':[275,470,650],
       'OccupiedSpaces': [oc_A, oc_B, oc_C]}
 
@@ -336,6 +336,61 @@ for _, row in report1.iterrows():
                     text-decoration: none; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
             {row['Equip']}
         </a>
+    </div>
+    """
+
+overlay_html += f"""
+        <div style="position: absolute; top: 130px; left: 750px;">
+        <div style="background: #8B8000; padding: 6px 12px; border-radius: 20px;
+         text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+         Total Open Spaces: {Open} ({OpenP} %)
+            </div>
+        </div>
+        """
+        
+overlay_html += f"""
+<div style="position: absolute; top: 180px; left: 800px;">
+<div style="background: purple; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space A (Open: {OpenA} %)
+    </div>
+</div>
+"""
+
+overlay_html += f"""
+<div style="position: absolute; top: 340px; left: 800px;">
+<div style="background: magenta; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space B (Open: {OpenB} %)
+    </div>
+</div>
+"""
+
+overlay_html += f"""
+<div style="position: absolute; top: 561px; left: 800px;">
+<div style="background: blue; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space C (Open: {OpenC} %)
+    </div>
+</div>
+"""
+
+for _, row in df_A.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
+     text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+     Open: {row['AvailableSpaces']}
+        </div>
+    </div>
+    """
+for _, row in df_O.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
+     text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+     Occupied: {row['OccupiedSpaces']}
+        </div>
     </div>
     """
 
@@ -519,60 +574,7 @@ overlay_html += """
     }
 </script>
 """
-overlay_html += f"""
-        <div style="position: absolute; top: 130px; left: 1000px;">
-        <div style="background: #8B8000; padding: 6px 12px; border-radius: 20px;
-         text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-         Total Open Spaces: {Open} ({OpenP} %)
-            </div>
-        </div>
-        """
-        
-overlay_html += f"""
-<div style="position: absolute; top: 190px; left: 1050px;">
-<div style="background: purple; padding: 6px 12px; border-radius: 20px;
-  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-  Space A (Open: {OpenA} %)
-    </div>
-</div>
-"""
 
-overlay_html += f"""
-<div style="position: absolute; top: 380px; left: 1050px;">
-<div style="background: magenta; padding: 6px 12px; border-radius: 20px;
-  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-  Space B (Open: {OpenB} %)
-    </div>
-</div>
-"""
-
-overlay_html += f"""
-<div style="position: absolute; top: 570px; left: 1050px;">
-<div style="background: blue; padding: 6px 12px; border-radius: 20px;
-  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-  Space C (Open: {OpenC} %)
-    </div>
-</div>
-"""
-
-for _, row in df_A.iterrows():
-    overlay_html += f"""
-    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
-    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
-     text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-     Open: {row['AvailableSpaces']}
-        </div>
-    </div>
-    """
-for _, row in df_O.iterrows():
-    overlay_html += f"""
-    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
-    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
-     text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-     Occupied: {row['OccupiedSpaces']}
-        </div>
-    </div>
-    """
 
     
 
