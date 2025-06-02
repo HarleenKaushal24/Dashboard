@@ -358,7 +358,7 @@ overlay_html += f"""
 """
 
 overlay_html += f"""
-<div style="position: absolute; top: 340px; left: 800px;">
+<div style="position: absolute; top: 367px; left: 800px;">
 <div style="background: magenta; padding: 6px 12px; border-radius: 20px;
   text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
   Space B (Open: {OpenB} %)
