@@ -8,6 +8,7 @@ Created on Mon May  5 15:08:14 2025
 #pip install smartsheet-python-sdk
 import smartsheet
 import pandas as pd
+from datetime import datetime
 #import numpy as np
 import streamlit as st
 from streamlit.components.v1 import html
@@ -23,6 +24,7 @@ import requests
 
 @st.cache_data(ttl=86400)  # Cache result for 24 hours
 def get_bubble_data():
+    data_fetched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     w_key = st.secrets["bubble"]["w_key"]
     url_w = st.secrets["bubble"]["url_w"]
     headers_w = {
@@ -43,10 +45,11 @@ def get_bubble_data():
         all_results.extend(results)
         cursor += limit  
 
-    return pd.DataFrame(all_results)
+    return pd.DataFrame(all_results), data_fetched_at
 
 
-df = get_bubble_data()
+df, last_updated = get_bubble_data()
+st.markdown(f"🕒 Bubble data last refreshed on: **{last_updated}**")
 # df = pd.DataFrame(all_results)
 df_A= df[df['Location Code'].str.startswith('A', na=False)]
 df_B= df[df['Location Code'].str.startswith('B', na=False)]
