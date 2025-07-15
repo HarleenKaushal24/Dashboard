@@ -8,13 +8,13 @@ Created on Mon May  5 15:08:14 2025
 #pip install smartsheet-python-sdk
 import smartsheet
 import pandas as pd
-import numpy as np
+#import numpy as np
 import streamlit as st
 from streamlit.components.v1 import html
 import base64
 from streamlit_autorefresh import st_autorefresh
 import json
-import requests
+#import requests
 
 token = st.secrets["smartsheet"]["token"]
 
@@ -35,6 +35,18 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     return f"data:image/png;base64,{encoded}"
+
+#report_name="Robot Whiteboard Report"
+
+# headers = {
+#     'Authorization': f'Bearer {token}'
+# }
+# response1 = requests.get(
+#     f'https://api.smartsheet.com/2.0/reports/{report_id}',
+#     headers=headers
+# )
+# data = response1.json()
+# data.keys()
 
 
 def reports_data(report_name):
