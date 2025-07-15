@@ -16,7 +16,8 @@ import base64
 from streamlit_autorefresh import st_autorefresh
 import json
 import requests
-
+from zoneinfo import ZoneInfo
+toronto_time = datetime.now(ZoneInfo("America/Toronto"))
 
 
 ###########################################################################
@@ -49,7 +50,7 @@ def get_bubble_data():
 
 
 df, last_updated = get_bubble_data()
-st.markdown(f"🕒 Bubble data last refreshed on: **{last_updated}**")
+st.markdown(f"🕒 Bubble data last refreshed on: **{toronto_time.strftime(last_updated)}**")
 # df = pd.DataFrame(all_results)
 df_A= df[df['Location Code'].str.startswith('A', na=False)]
 df_B= df[df['Location Code'].str.startswith('B', na=False)]
@@ -166,6 +167,8 @@ with col2:
     st.title("Factory Map")
     
 st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (1 second=1000 milliseconds)
+ss_data_fetched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+st.markdown(f"🕒 Production data last refreshed on: **{toronto_time.strftime(ss_data_fetched_at)}**")
 
 image_url="Images/Map.png"
 image_base64 = get_base64_image(image_url)
