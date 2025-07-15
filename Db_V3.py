@@ -158,6 +158,9 @@ def extract_bse(val):
 image_url5="Images/logo.png"
 logo = get_base64_image(image_url5)
 # Streamlit page setup
+st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (1 second=1000 milliseconds)
+ss_data_fetched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+st.markdown(f"🕒 Production data last refreshed on: **{toronto_time.strftime(ss_data_fetched_at)}**")
 st.set_page_config(layout="wide")
 #st.title("Factory Map")
 col1, col2 = st.columns([1,20])
@@ -166,9 +169,7 @@ with col1:
 with col2:
     st.title("Factory Map")
     
-st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (1 second=1000 milliseconds)
-ss_data_fetched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-st.markdown(f"🕒 Production data last refreshed on: **{toronto_time.strftime(ss_data_fetched_at)}**")
+
 
 image_url="Images/Map.png"
 image_base64 = get_base64_image(image_url)
