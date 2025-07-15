@@ -1,20 +1,89 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu May 29 11:30:36 2025
+Created on Mon May  5 15:08:14 2025
 
 @author: Harleen
 """
 
-
 #pip install smartsheet-python-sdk
 import smartsheet
 import pandas as pd
-import numpy as np
+#import numpy as np
 import streamlit as st
 from streamlit.components.v1 import html
 import base64
 from streamlit_autorefresh import st_autorefresh
 import json
+import requests
+
+
+
+###########################################################################
+##bubble app api
+
+@st.cache_data(ttl=86400)  # Cache result for 24 hours
+def get_bubble_data():
+    w_key = st.secrets["bubble"]["w_key"]
+    url_w = st.secrets["bubble"]["url_w"]
+    headers_w = {
+        'X-API-Key': w_key
+    }
+
+    all_results = []
+    cursor = 0
+    limit = 100
+
+    while True:
+        params = {'cursor': cursor, 'limit': limit}
+        response = requests.get(url_w, headers=headers_w, params=params)
+        data = response.json()
+        results = data.get('response', {}).get('results', [])
+        if not results:
+            break
+        all_results.extend(results)
+        cursor += limit  
+
+    return pd.DataFrame(all_results)
+
+
+df = get_bubble_data()
+# df = pd.DataFrame(all_results)
+df_A= df[df['Location Code'].str.startswith('A', na=False)]
+df_B= df[df['Location Code'].str.startswith('B', na=False)]
+df_C= df[df['Location Code'].str.startswith('C', na=False)]
+
+av_A=df_A['Raw Materials Skid'].isna().sum()
+av_B=df_B['Raw Materials Skid'].isna().sum()
+av_C=df_C['Raw Materials Skid'].isna().sum()
+Open=av_A + av_B + av_C
+
+
+oc_A= df_A.shape[0] - df_A['Raw Materials Skid'].isna().sum()
+oc_B= df_B.shape[0] - df_B['Raw Materials Skid'].isna().sum()
+oc_C= df_C.shape[0] - df_C['Raw Materials Skid'].isna().sum()
+
+OpenP=round(Open*100/(oc_A + oc_B + oc_C + Open),0)
+OpenA=round(av_A*100/(oc_A + av_A),0)
+OpenB=round(av_B*100/(oc_B + av_B),0)
+OpenC=round(av_C*100/(oc_B + av_C),0)
+
+db_A={'Spaces': ['C','B', 'A'],
+        'x':[900,900,900],
+        'y':[275,470,650],
+      'AvailableSpaces': [av_C, av_B, av_A]}
+
+db_O={'Spaces': ['A','B', 'C'],
+        'x':[750,750,750],
+        'y':[275,470,650],
+      'OccupiedSpaces': [oc_C, oc_B, oc_A]}
+
+df_A = pd.DataFrame(db_A)
+df_A['Colour']="#8B8000"
+df_O = pd.DataFrame(db_O)
+df_O['Colour']="#848884"
+
+###########################################################################
+
 
 token = st.secrets["smartsheet"]["token"]
 
@@ -35,6 +104,7 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     return f"data:image/png;base64,{encoded}"
+
 
 
 def reports_data(report_name):
@@ -81,19 +151,24 @@ def extract_bse(val):
     return str(int(val)) if float(val).is_integer() else str(int(float(val)))
 
 
-# Load logo image
-image_url5 = "Images/logo.png"
+image_url5="Images/logo.png"
 logo = get_base64_image(image_url5)
+# Streamlit page setup
+st.set_page_config(layout="wide")
+#st.title("Factory Map")
+col1, col2 = st.columns([1,20])
+with col1:
+    st.image(logo, width=100)  # Adjust path and size as needed
+with col2:
+    st.title("Factory Map")
+    
+st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (1 second=1000 milliseconds)
 
-
-# Auto-refresh every 5 minutes
-st_autorefresh(interval=300000, key="auto-refresh")
-
-# Load and display map image
-image_url = "Images/Map.png"
+image_url="Images/Map.png"
 image_base64 = get_base64_image(image_url)
-# st.image(image_url, use_column_width=True)
-        
+
+# Load and encode image to base64
+
 image_url1="Images/spec_sheet.png"
 image_base64_spec = get_base64_image(image_url1)
 image_url2="Images/ss.png"
@@ -247,29 +322,9 @@ link_url = "https://www.boscoandroxys.com/"
 
 
 
-col1, col2 = st.columns([1,20])
-with col1:
-    st.image(logo, width=100)  
-with col2:
-    st.title("Factory Map")
 
-# --- Second row: Two Buttons ---
-btn1_col, btn2_col = st.columns(2)
-
-if 'active_button' not in st.session_state:
-    st.session_state.active_button = None
-
-with btn1_col:
-    if st.button("Production"):
-        st.session_state.active_button = 'A'
-
-with btn2_col:
-    if st.button("Warehouse"):
-        st.session_state.active_button = 'B'
-
-# --- Third row: Static Map + Conditional Overlay ---
-map_col = st.container()
-
+# ----- HTML with embedded JS -----
+#<div style="width: 100%; overflow-x: auto;">
 overlay_html = f"""
 <div style="width: 100%; overflow-x: auto;">
 <div style="width: 1600px; margin: 0 auto; display: flex; align-items: flex-start;">
@@ -278,206 +333,258 @@ overlay_html = f"""
   <div style="position: relative; width: 1500px; height: 1600px; 
       background-image: url('{image_base64}'); background-repeat: no-repeat;
       background-size: contain; background-position: center; border: 2px solid #ccc;margin: 0 auto;">"""
-      
-with map_col:
-    if st.session_state.active_button == 'A':
-        # Add equipment buttons
-        for _, row in report1.iterrows():
-            overlay_html += f"""
-            <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
-                <a href="javascript:void(0)" onclick="showOptions('{row['Equip']}', '{row['Db']}','{row['img1']}')"
-                    style="background: {row['Colour']}; padding: 6px 12px; border-radius: 26px;
-                            text-decoration: none; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
-                    {row['Equip']}
-                </a>
+
+# Add equipment buttons
+for _, row in report1.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+        <a href="javascript:void(0)" onclick="showOptions('{row['Equip']}', '{row['Db']}','{row['img1']}')"
+            style="background: {row['Colour']}; padding: 6px 12px; border-radius: 26px;
+                    text-decoration: none; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+            {row['Equip']}
+        </a>
+    </div>
+    """
+
+overlay_html += f"""
+        <div style="position: absolute; top: 130px; left: 750px;">
+        <div style="background: #8B8000; padding: 6px 12px; border-radius: 20px;
+          text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+          Total Open Spaces: {Open} ({OpenP} %)
             </div>
-            """
-
-        # Close map div and start side panel
-        overlay_html += """
-          </div>
-
-          <!-- Side Options Panel -->
-          <div id="side-options" tabindex="0" style="
-            width: 400px;
-            max-height: 1600px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px;
-            border-left: 2px solid #ccc;
-            box-sizing: border-box;
-            background: #f9f9f9;
-            margin-left: 20px;">
-            <p style="color: #777;">Click on an equipment button to see options here.</p>
-          </div>
-
         </div>
-
-        <script>
-           
-            // Equipment descriptions from report1
-            window.equipData = """ + json.dumps(
-                report1[['Equip', 'Description','Colour','img1']].dropna().to_dict(orient="records")
-            ) + """;
-
-            // BSE spec data for all equipment
-            window.bseData = """ + json.dumps(links[['Equipment', 'BSE1', 'img','Links','Dept']].dropna().to_dict(orient="records")) + """;
-
-            // Function to show dashboard and spec buttons in side panel
-            function showOptions(equip, link,img1) {
-                const panel = document.getElementById('side-options');         
-                panel.innerHTML = '<h4 style="margin-bottom: 10px; font-size: 30px;"> ' + equip + '</h4>';
-                panel.focus();
-                panel.scrollIntoView({ behavior: 'smooth' });
-                const dashBtn = document.createElement('button');
-                dashBtn.innerText = 'Smartsheet Dashboards';
-                dashBtn.style.backgroundImage = `url('${img1}')`;
-                dashBtn.style.opacity = "0.8";
-                dashBtn.style.backgroundRepeat = "no-repeat";
-                dashBtn.style.backgroundSize = 'cover'; 
-                dashBtn.style.backgroundPosition = 'center'; 
-                dashBtn.style.width = '155px'; 
-                dashBtn.style.height = '90px';
-                dashBtn.style.fontSize = '20px';
-                dashBtn.style.fontWeight = "bold";
-                //dashBtn.style.marginBottom = '12px';
-                //dashBtn.style.padding = '8px 14px';
-                //dashBtn.style.background = '#ACDDDE';
-                dashBtn.style.color = 'Black';
-                dashBtn.style.border = 'none';
-                dashBtn.style.borderRadius = '8px';
-                dashBtn.style.cursor = 'pointer';
-                dashBtn.onclick = () => window.open(link, '_blank');
-                panel.appendChild(dashBtn);
-                
-
-                const filtered = window.bseData.filter(row => row.Equipment === equip && row.Dept !== 'Spec');
-                if (filtered.length > 0) {
-                    const label = document.createElement('div');
-                    label.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Parameter Sheets:</h5>';
-                    panel.appendChild(label);
-                    filtered.forEach(row => {
-                        const btn = document.createElement('button');
-                        btn.innerText =   row.BSE1;
-                        btn.style.display = 'flex';
-                        btn.style.alignItems = 'center';
-                        btn.style.justifyContent = 'center';
-                        btn.style.color = 'black';
-                        btn.style.fontSize = '30px';
-                        btn.style.fontWeight = "bold";
-                        btn.style.textDecoration = "underline"; // default (solid)
-                        //btn.style.textDecorationStyle = "dotted";     // dotted underline
-                        btn.style.textDecorationStyle = "dashed";     // dashed underline
-                        //btn.style.textDecorationStyle = "double";     // double underline
-                        //btn.style.textDecorationStyle = "wavy";       // wavy underline
-                        btn.style.textDecorationColor = "black";       // custom underline color
-                        btn.style.textDecorationThickness = "2px";    // custom thickness
-                        btn.style.textAlign = 'center';
-                        btn.style.border = 'none';
-                        btn.style.borderRadius = '10px';
-                        btn.style.cursor = 'pointer';
-                        //btn.style.margin = '10px';
-                        //btn.style.marginTop = '5px';
-                        btn.style.marginBottom = '5px';
-                        btn.style.padding = '10px';
-                        
-                        // Adding background image
-                        //btn.style.backgroundImage = "url('https://www.shutterstock.com/shutterstock/photos/2239154457/display_1500/stock-photo-digital-tablet-with-sample-spreadsheet-document-on-the-screen-2239154457.jpg')";
-                        btn.style.backgroundImage = `url('${row.img}')`;
-                        btn.style.opacity = "0.8";
-                        btn.style.backgroundRepeat = "no-repeat";
-                        btn.style.backgroundSize = 'cover'; 
-                        btn.style.backgroundPosition = 'center'; 
-                        // Adjusting button size to match the image's aspect ratio
-                        btn.style.width = '111px'; 
-                        btn.style.height = '160px';
-                        
-                        btn.onclick = () => window.open(row.Links, '_blank');
-                        panel.appendChild(btn);
-                    });
-                } else {
-                    const msg = document.createElement('p');
-                    msg.innerText = 'No parameter sheets found for this equipment.';
-                    panel.appendChild(msg);
-                }
-                    
-                const filtered1 = window.bseData.filter(row => row.Equipment === equip && row.Dept === 'Spec');
-                if (filtered1.length > 0) {
-                    const label1 = document.createElement('div');
-                    label1.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Specification Sheets:</h5>';
-                    panel.appendChild(label1);
-                    filtered1.forEach(row => {
-                        const btn1 = document.createElement('button');
-                        btn1.innerText =   row.BSE1;
-                        btn1.style.display = 'flex';
-                        btn1.style.alignItems = 'center';
-                        btn1.style.justifyContent = 'center';
-                        btn1.style.color = 'black';
-                        btn1.style.fontSize = '20px';
-                        btn1.style.fontWeight = "bold";
-                        btn1.style.textDecoration = "underline"; // default (solid)
-                        btn1.style.textDecorationStyle = "dashed";     // dashed underline
-                        btn1.style.textDecorationColor = "black";       // custom underline color
-                        btn1.style.textDecorationThickness = "2px";    // custom thickness
-                        btn1.style.textAlign = 'center';
-                        btn1.style.border = 'none';
-                        btn1.style.borderRadius = '1px';
-                        btn1.style.cursor = 'pointer';
-                        btn1.style.marginBottom = '1px';
-                        btn1.style.padding = '1px';
-                        
-                        btn1.style.whiteSpace = 'normal';
-                        btn1.style.width = '100%';
-                        btn1.style.maxWidth = '100%';
-                        btn1.style.overflow = 'visible';
-                        btn1.style.wordBreak = 'break-word';
-                        btn1.style.lineHeight = '1.2';
-                        
-                        // Adding background image
-                        btn1.style.backgroundImage = `url('${row.img}')`;
-                        btn1.style.opacity = "0.8";
-                        btn1.style.backgroundRepeat = "no-repeat";
-                        btn1.style.backgroundSize = 'cover'; 
-                        btn1.style.backgroundPosition = 'center'; 
-                        // Adjusting button size to match the image's aspect ratio
-                        btn1.style.width = '111px'; 
-                        btn1.style.height = '160px';
-                        
-                        btn1.onclick = () => window.open(row.Links, '_blank');
-                        panel.appendChild(btn1);
-                    });
-                } else {
-                    const msg1 = document.createElement('p');
-                    msg1.innerText = '';
-                    panel.appendChild(msg1);
-                }
-                    
-                 // Show description
-                const descData = window.equipData.find(row => row.Equip === equip);
-                if (descData) {
-                   const descBox = document.createElement('div');
-                   descBox.innerText = '⌛Overall:' + descData.Description + '🕒';
-                   descBox.style.marginTop = '12px';
-                   descBox.style.padding = '10px 14px';
-                   descBox.style.background = descData.Colour;
-                   descBox.style.color = 'white';
-                   descBox.style.borderRadius = '8px';
-                   descBox.style.boxShadow = '1px 1px 3px rgba(0,0,0,0.1)';
-                   descBox.style.fontSize = '25px';
-                   descBox.style.opacity = "0.5";
-                   // descBox.style.borderLeft = '4px solid #2857a7'; // accent strip
-                   panel.appendChild(descBox);
-                }
-                
-                
-            }
-        </script>
-        """    
+        """
         
-    elif st.session_state.active_button == 'B':
-        st.markdown("🛠️ Dashboard Under Construction")
+overlay_html += f"""
+<div style="position: absolute; top: 180px; left: 800px;">
+<div style="background: purple; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space C (Open: {OpenC} %)
+    </div>
+</div>
+"""
+
+overlay_html += f"""
+<div style="position: absolute; top: 367px; left: 800px;">
+<div style="background: magenta; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space B (Open: {OpenB} %)
+    </div>
+</div>
+"""
+
+overlay_html += f"""
+<div style="position: absolute; top: 561px; left: 800px;">
+<div style="background: blue; padding: 6px 12px; border-radius: 20px;
+  text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+  Space A (Open: {OpenA} %)
+    </div>
+</div>
+"""
+
+for _, row in df_A.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
+      text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+      Open: {row['AvailableSpaces']}
+        </div>
+    </div>
+    """
+for _, row in df_O.iterrows():
+    overlay_html += f"""
+    <div style="position: absolute; top: {row['y']}px; left: {row['x']}px;">
+    <div style="background: {row['Colour']}; padding: 6px 12px; border-radius: 20px;
+      text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
+      Occupied: {row['OccupiedSpaces']}
+        </div>
+    </div>
+    """
+
+# Close map div and start side panel
+overlay_html += """
+  </div>
+
+  <!-- Side Options Panel -->
+  <div id="side-options" tabindex="0" style="
+    width: 400px;
+    max-height: 1600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    border-left: 2px solid #ccc;
+    box-sizing: border-box;
+    background: #f9f9f9;
+    margin-left: 20px;">
+    <p style="color: #777;">Click on an equipment button to see options here.</p>
+  </div>
+
+</div>
+
+<script>
+   
+    // Equipment descriptions from report1
+    window.equipData = """ + json.dumps(
+        report1[['Equip', 'Description','Colour','img1']].dropna().to_dict(orient="records")
+    ) + """;
+
+    // BSE spec data for all equipment
+    window.bseData = """ + json.dumps(links[['Equipment', 'BSE1', 'img','Links','Dept']].dropna().to_dict(orient="records")) + """;
+
+    // Function to show dashboard and spec buttons in side panel
+    function showOptions(equip, link,img1) {
+        const panel = document.getElementById('side-options');         
+        panel.innerHTML = '<h4 style="margin-bottom: 10px; font-size: 30px;"> ' + equip + '</h4>';
+        panel.focus();
+        panel.scrollIntoView({ behavior: 'smooth' });
+        const dashBtn = document.createElement('button');
+        dashBtn.innerText = 'Smartsheet Dashboards';
+        dashBtn.style.backgroundImage = `url('${img1}')`;
+        dashBtn.style.opacity = "0.8";
+        dashBtn.style.backgroundRepeat = "no-repeat";
+        dashBtn.style.backgroundSize = 'cover'; 
+        dashBtn.style.backgroundPosition = 'center'; 
+        dashBtn.style.width = '155px'; 
+        dashBtn.style.height = '90px';
+        dashBtn.style.fontSize = '20px';
+        dashBtn.style.fontWeight = "bold";
+        //dashBtn.style.marginBottom = '12px';
+        //dashBtn.style.padding = '8px 14px';
+        //dashBtn.style.background = '#ACDDDE';
+        dashBtn.style.color = 'Black';
+        dashBtn.style.border = 'none';
+        dashBtn.style.borderRadius = '8px';
+        dashBtn.style.cursor = 'pointer';
+        dashBtn.onclick = () => window.open(link, '_blank');
+        panel.appendChild(dashBtn);
+        
+
+        const filtered = window.bseData.filter(row => row.Equipment === equip && row.Dept !== 'Spec');
+        if (filtered.length > 0) {
+            const label = document.createElement('div');
+            label.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Parameter Sheets:</h5>';
+            panel.appendChild(label);
+            filtered.forEach(row => {
+                const btn = document.createElement('button');
+                btn.innerText =   row.BSE1;
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.color = 'black';
+                btn.style.fontSize = '30px';
+                btn.style.fontWeight = "bold";
+                btn.style.textDecoration = "underline"; // default (solid)
+                //btn.style.textDecorationStyle = "dotted";     // dotted underline
+                btn.style.textDecorationStyle = "dashed";     // dashed underline
+                //btn.style.textDecorationStyle = "double";     // double underline
+                //btn.style.textDecorationStyle = "wavy";       // wavy underline
+                btn.style.textDecorationColor = "black";       // custom underline color
+                btn.style.textDecorationThickness = "2px";    // custom thickness
+                btn.style.textAlign = 'center';
+                btn.style.border = 'none';
+                btn.style.borderRadius = '10px';
+                btn.style.cursor = 'pointer';
+                //btn.style.margin = '10px';
+                //btn.style.marginTop = '5px';
+                btn.style.marginBottom = '5px';
+                btn.style.padding = '10px';
+                
+                // Adding background image
+                //btn.style.backgroundImage = "url('https://www.shutterstock.com/shutterstock/photos/2239154457/display_1500/stock-photo-digital-tablet-with-sample-spreadsheet-document-on-the-screen-2239154457.jpg')";
+                btn.style.backgroundImage = `url('${row.img}')`;
+                btn.style.opacity = "0.8";
+                btn.style.backgroundRepeat = "no-repeat";
+                btn.style.backgroundSize = 'cover'; 
+                btn.style.backgroundPosition = 'center'; 
+                // Adjusting button size to match the image's aspect ratio
+                btn.style.width = '111px'; 
+                btn.style.height = '160px';
+                
+                btn.onclick = () => window.open(row.Links, '_blank');
+                panel.appendChild(btn);
+            });
+        } else {
+            const msg = document.createElement('p');
+            msg.innerText = 'No parameter sheets found for this equipment.';
+            panel.appendChild(msg);
+        }
+            
+        const filtered1 = window.bseData.filter(row => row.Equipment === equip && row.Dept === 'Spec');
+        if (filtered1.length > 0) {
+            const label1 = document.createElement('div');
+            label1.innerHTML = '<h5 style="margin: 5px 0;font-size: 24px;">Specification Sheets:</h5>';
+            panel.appendChild(label1);
+            filtered1.forEach(row => {
+                const btn1 = document.createElement('button');
+                btn1.innerText =   row.BSE1;
+                btn1.style.display = 'flex';
+                btn1.style.alignItems = 'center';
+                btn1.style.justifyContent = 'center';
+                btn1.style.color = 'black';
+                btn1.style.fontSize = '20px';
+                btn1.style.fontWeight = "bold";
+                btn1.style.textDecoration = "underline"; // default (solid)
+                btn1.style.textDecorationStyle = "dashed";     // dashed underline
+                btn1.style.textDecorationColor = "black";       // custom underline color
+                btn1.style.textDecorationThickness = "2px";    // custom thickness
+                btn1.style.textAlign = 'center';
+                btn1.style.border = 'none';
+                btn1.style.borderRadius = '1px';
+                btn1.style.cursor = 'pointer';
+                btn1.style.marginBottom = '1px';
+                btn1.style.padding = '1px';
+                
+                btn1.style.whiteSpace = 'normal';
+                btn1.style.width = '100%';
+                btn1.style.maxWidth = '100%';
+                btn1.style.overflow = 'visible';
+                btn1.style.wordBreak = 'break-word';
+                btn1.style.lineHeight = '1.2';
+                
+                // Adding background image
+                btn1.style.backgroundImage = `url('${row.img}')`;
+                btn1.style.opacity = "0.8";
+                btn1.style.backgroundRepeat = "no-repeat";
+                btn1.style.backgroundSize = 'cover'; 
+                btn1.style.backgroundPosition = 'center'; 
+                // Adjusting button size to match the image's aspect ratio
+                btn1.style.width = '111px'; 
+                btn1.style.height = '160px';
+                
+                btn1.onclick = () => window.open(row.Links, '_blank');
+                panel.appendChild(btn1);
+            });
+        } else {
+            const msg1 = document.createElement('p');
+            msg1.innerText = '';
+            panel.appendChild(msg1);
+        }
+            
+         // Show description
+        const descData = window.equipData.find(row => row.Equip === equip);
+        if (descData) {
+           const descBox = document.createElement('div');
+           descBox.innerText = '⌛Overall:' + descData.Description + '🕒';
+           descBox.style.marginTop = '12px';
+           descBox.style.padding = '10px 14px';
+           descBox.style.background = descData.Colour;
+           descBox.style.color = 'white';
+           descBox.style.borderRadius = '8px';
+           descBox.style.boxShadow = '1px 1px 3px rgba(0,0,0,0.1)';
+           descBox.style.fontSize = '25px';
+           descBox.style.opacity = "0.5";
+           // descBox.style.borderLeft = '4px solid #2857a7'; // accent strip
+           panel.appendChild(descBox);
+        }
+        
+        
+    }
+</script>
+"""
+
+
 
 
 # Render to Streamlit
 html(overlay_html, height=1800)
-        
+
