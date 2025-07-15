@@ -25,7 +25,7 @@ toronto_time = datetime.now(ZoneInfo("America/Toronto"))
 
 @st.cache_data(ttl=86400)  # Cache result for 24 hours
 def get_bubble_data():
-    data_fetched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data_fetched_at = datetime.now()
     w_key = st.secrets["bubble"]["w_key"]
     url_w = st.secrets["bubble"]["url_w"]
     headers_w = {
