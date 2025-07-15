@@ -50,7 +50,9 @@ def get_bubble_data():
 
 
 df, last_updated = get_bubble_data()
-st.markdown(f"🕒 Bubble data last refreshed on: **{toronto_time.strftime(last_updated)}**")
+data_fetched_at1 = last_updated.astimezone(ZoneInfo("America/Toronto"))
+#st.markdown(f"🕒 Production data last refreshed on: **{ss_data_fetched_at1.strftime('%Y-%m-%d %H:%M:%S')}**")
+st.markdown(f"🕒 Bubble data last refreshed on: **{data_fetched_at1.strftime('%Y-%m-%d %H:%M:%S')}**")
 # df = pd.DataFrame(all_results)
 df_A= df[df['Location Code'].str.startswith('A', na=False)]
 df_B= df[df['Location Code'].str.startswith('B', na=False)]
@@ -159,8 +161,9 @@ image_url5="Images/logo.png"
 logo = get_base64_image(image_url5)
 # Streamlit page setup
 st_autorefresh(interval=300000, key="auto-refresh")  # refresh every 5 minutes (1 second=1000 milliseconds)
-ss_data_fetched_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-st.markdown(f"🕒 Production data last refreshed on: **{toronto_time.strftime(ss_data_fetched_at)}**")
+ss_data_fetched_at = datetime.now()
+ss_data_fetched_at1 = ss_data_fetched_at.astimezone(ZoneInfo("America/Toronto"))
+st.markdown(f"🕒 Production data last refreshed on: **{ss_data_fetched_at1.strftime('%Y-%m-%d %H:%M:%S')}**")
 st.set_page_config(layout="wide")
 #st.title("Factory Map")
 col1, col2 = st.columns([1,20])
