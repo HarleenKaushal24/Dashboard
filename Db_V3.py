@@ -280,9 +280,9 @@ report1["Status"]=["Ahead by " if x >= 0 else "Behind by " for x in report1['Min
 report1["Description"]=report1["Status"] + round(abs(report1["Minutes Ahead/ Behind"]),0).astype(str) +" minutes"
 report1["img1"]=image_base64_ss
 report1['Colour'] = report1['Colour'].fillna('Grey')
-report1['Equip'] = report1['Equip'].replace({'R1': 'Robot1', 'R2': 'Robot2', 'R3': 'Robot3',
-                    'P1': 'Pack Line1','P2': 'Pack Line2','P3': 'Pack Line3','P4': 'Pack Line4','P5': 'Pack Line5',
-                    'E1': 'Enrober1','E2': 'Enrober2','E3': 'Enrober3','E4': 'Enrober4','E5': 'Enrober5'})
+#report1['Equip'] = report1['Equip'].replace({'R1': 'Robot1', 'R2': 'Robot2', 'R3': 'Robot3',
+                    # 'P1': 'Pack Line1','P2': 'Pack Line2','P3': 'Pack Line3','P4': 'Pack Line4','P5': 'Pack Line5',
+                    # 'E1': 'Enrober1','E2': 'Enrober2','E3': 'Enrober3','E4': 'Enrober4','E5': 'Enrober5'})
 
 
 spec=sheets_data('SpecSheetLinks')
@@ -371,7 +371,7 @@ overlay_html += f"""
         
 overlay_html += f"""
 <div style="position: absolute; top: 180px; left: 800px;">
-<div style="background: purple; padding: 6px 12px; border-radius: 20px;
+<div style="background: blue; padding: 6px 12px; border-radius: 20px;
   text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
   Space C (Open: {OpenC} %)
     </div>
@@ -380,7 +380,7 @@ overlay_html += f"""
 
 overlay_html += f"""
 <div style="position: absolute; top: 367px; left: 800px;">
-<div style="background: magenta; padding: 6px 12px; border-radius: 20px;
+<div style="background: blue; padding: 6px 12px; border-radius: 20px;
   text-align: center; font-weight: bold; color: white; box-shadow: 1px 1px 3px #999;">
   Space B (Open: {OpenB} %)
     </div>
