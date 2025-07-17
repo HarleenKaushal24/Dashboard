@@ -23,7 +23,7 @@ toronto_time = datetime.now(ZoneInfo("America/Toronto"))
 ###########################################################################
 ##bubble app api
 
-@st.cache_data(ttl=86400)  # Cache result for 24 hours
+@st.cache_data(ttl=86400)  # Cache result for 24 hours (units in seconds)
 def get_bubble_data():
     data_fetched_at = datetime.now()
     w_key = st.secrets["bubble"]["w_key"]
@@ -280,6 +280,10 @@ report1["Status"]=["Ahead by " if x >= 0 else "Behind by " for x in report1['Min
 report1["Description"]=report1["Status"] + round(abs(report1["Minutes Ahead/ Behind"]),0).astype(str) +" minutes"
 report1["img1"]=image_base64_ss
 report1['Colour'] = report1['Colour'].fillna('Grey')
+report1['Equip'] = report1['Equip'].replace({'R1': 'Robot1', 'R2': 'Robot2', 'R3': 'Robot3',
+                    'P1': 'Pack Line1','P2': 'Pack Line2','P3': 'Pack Line3','P4': 'Pack Line4','P5': 'Pack Line5',
+                    'E1': 'Enrober1','E2': 'Enrober2','E3': 'Enrober3','E4': 'Enrober4','E5': 'Enrober5'})
+
 
 spec=sheets_data('SpecSheetLinks')
 spec_rb=sheets_data('RobotParameterSheets')
