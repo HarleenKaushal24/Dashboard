@@ -32,8 +32,7 @@ if st.button("Notify"):
             "employee": selected_employee,
             "e_email":e_email     
         }
-        # Replace with your n8n webhook URL
-        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook-test/webhook/reception", json=payload)
+        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook/webhook/reception", json=payload)
 
         if response.status_code == 200:
             st.success("The person you want to meet has been notified!")
@@ -48,15 +47,30 @@ if st.button("Notify"):
 
 response_placeholder = st.empty()
 
-polling_url = "https://boscoandroxys.app.n8n.cloud/webhook-test/webhook/reception"
+polling_url = "https://boscoandroxys.app.n8n.cloud/webhook/webhook/reception"
 params = {"guest_name": guest_name}
+
+
+payload = {
+    "data": {
+        "text": "coming"
+    }
+}
+
+
+response = requests.get(url)
+
+# 📥 Import the response (text in this case)
+print("Status Code:", response.status_code)
+print("Response Body:", response.text)
+
 
 for _ in range(20):  # Poll for up to 1 minute (20 x 3 seconds)
     time.sleep(3)
     try:
         res = requests.get(polling_url, params=params)
         if res.status_code == 200 and res.json().get("response"):
-            reply = res.json()["response"]
+            reply = res.json()["data"]
             response_placeholder.success(f"✉️ Reply from {selected_employee}: {reply}")
             break
     except:
