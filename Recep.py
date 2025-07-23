@@ -19,6 +19,7 @@ guest_reason = st.text_input("Reason for Visit")
 
 # Employee list — you can later load this from a file or API
 employee_list = ["Emp1", "Emp2", "Emp3", "Emp4"]
+e_email=["harleen@boscoandroxys.com"]
 selected_employee = st.selectbox("Who would you like to meet?", employee_list)
 
 if st.button("Notify"):
@@ -26,7 +27,8 @@ if st.button("Notify"):
         payload = {
             "guest_name": guest_name,
             "guest_reason": guest_reason,
-            "employee": selected_employee
+            "employee": selected_employee,
+            "e_email":e_email     
         }
         # Replace with your n8n webhook URL
         response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook-test/webhook/reception", json=payload)
