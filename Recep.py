@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jul 23 10:39:45 2025
+
+@author: Harleen
+"""
+
+import streamlit as st
+import requests
+
+st.set_page_config(page_title="Reception Assistant", layout="centered")
+
+st.title("👋 Welcome to Our Office")
+st.write("Please enter your details to notify the person you're here to meet.")
+
+# Guest details
+guest_name = st.text_input("Your Name")
+guest_reason = st.text_input("Reason for Visit")
+
+# Employee list — you can later load this from a file or API
+employee_list = ["Emp1", "Emp2", "Emp3", "Emp4"]
+selected_employee = st.selectbox("Who would you like to meet?", employee_list)
+
+if st.button("Notify"):
+    if guest_name and selected_employee:
+        payload = {
+            "guest_name": guest_name,
+            "guest_reason": guest_reason,
+            "employee": selected_employee
+        }
+        # Replace with your n8n webhook URL
+        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook-test/webhook/reception", json=payload)
+
+        if response.status_code == 200:
+            st.success("The person you want to meet has been notified!")
+            st.write("Waiting for their response...")
+        else:
+            st.error("Something went wrong. Please try again.")
+    else:
+        st.warning("Please enter your name and choose someone to meet.")
