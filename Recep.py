@@ -8,6 +8,7 @@ Created on Wed Jul 23 10:39:45 2025
 import streamlit as st
 import requests
 import time
+import uuid
 
 st.set_page_config(page_title="Reception Assistant", layout="centered")
 
@@ -21,60 +22,44 @@ guest_reason = st.text_input("Reason for Visit")
 # Employee list — you can later load this from a file or API
 employee_list = ["Emp1", "Emp2", "Emp3", "Emp4"]
 e_email=["harleen@boscoandroxys.com"]
+employee_emails = {
+    "Emp1": "harleen@boscoandroxys.com",
+    "Emp2": "teddy@boscoandroxys.com",
+    "Emp3": "harleen@boscoandroxys.com",
+    "Emp4": "teddy@boscoandroxys.com"
+}
 #selected_employee="Emp1"
 selected_employee = st.selectbox("Who would you like to meet?", employee_list)
 
 if st.button("Notify"):
     if guest_name and selected_employee:
+        visit_id = str(uuid.uuid4())  # Unique ID for the visit
         payload = {
             "guest_name": guest_name,
             "guest_reason": guest_reason,
             "employee": selected_employee,
-            "e_email":e_email     
+            "e_email":employee_emails[selected_employee],
+            "visit_id": visit_id 
         }
-        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook/webhook/reception", json=payload)
+        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook-test/webhook/reception", json=payload)
 
         if response.status_code == 200:
-            st.success("The person you want to meet has been notified!")
-            st.write("Waiting for their response...")
-        else:
-            st.error("Something went wrong. Please try again.")
-    else:
-        st.warning("Please enter your name and choose someone to meet.")
-
-
-
-
-response_placeholder = st.empty()
-
-polling_url = "https://boscoandroxys.app.n8n.cloud/webhook/webhook/reception"
-params = {"guest_name": guest_name}
-
-
-payload = {
-    "data": {
-        "text": "coming"
-    }
-}
-
-
-response = requests.get(url)
-
-# 📥 Import the response (text in this case)
-print("Status Code:", response.status_code)
-print("Response Body:", response.text)
-
-
-for _ in range(20):  # Poll for up to 1 minute (20 x 3 seconds)
-    time.sleep(3)
-    try:
-        res = requests.get(polling_url, params=params)
-        if res.status_code == 200 and res.json().get("response"):
-            reply = res.json()["data"]
-            response_placeholder.success(f"✉️ Reply from {selected_employee}: {reply}")
-            break
-    except:
-        pass
-    response_placeholder.info("Still waiting for response...")
-else:
-    response_placeholder.warning("⏳ No response received yet.")
+            st.success("Notification sent. Waiting for response...")
+            
+    #         # Poll every 5 seconds for up to 1 minute (adjust as needed)
+    #         for i in range(12):
+    #             time.sleep(5)
+    #             check = requests.get(f"https://your-api.com/check-response/{visit_id}")
+                
+    #             if check.status_code == 200 and check.json().get("response"):
+    #                 st.success("Employee Response:")
+    #                 st.write(check.json()["response"])
+    #                 break
+    #             else:
+    #                 st.info("Still waiting...")
+    #         else:
+    #             st.warning("No response yet. Please wait or contact the front desk.")
+    #     else:
+    #         st.error("Failed to notify. Try again.")
+    # else:
+    #     st.warning("Please enter your name and choose someone to meet.")
