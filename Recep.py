@@ -53,7 +53,7 @@ if st.button("Notify"):
             "e_email":employee_emails[selected_employee],
             "visit_id": visit_id 
         }
-        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook-test/webhook/reception", json=payload)
+        response = requests.post("https://boscoandroxys.app.n8n.cloud/webhook/webhook/reception", json=payload)
 
         if response.status_code == 200:
             st.success("Notification sent. Waiting for response...")
@@ -69,8 +69,8 @@ if st.button("Notify"):
                    st.success("Employee Response:")
                    st.write(result.iloc[0]["response"])
                    break
-               else:
-                    st.info("Still waiting...")
+               # else:
+               #      st.info("Still waiting...")
             else:
                 st.warning("No response yet. Please wait or contact the front desk.")
         else:
