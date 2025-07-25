@@ -7,8 +7,20 @@ Created on Wed Jul 23 10:39:45 2025
 
 import streamlit as st
 import requests
-import time
 import uuid
+import time
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import pandas as pd
+
+# Read service account info from Streamlit secrets
+service_account_info = st.secrets["gcp_service_account"]
+creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(service_account_info), [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+])
+client = gspread.authorize(creds)
+sheet = client.open("RecepReply").sheet1
 
 st.set_page_config(page_title="Reception Assistant", layout="centered")
 
@@ -21,7 +33,7 @@ guest_reason = st.text_input("Reason for Visit")
 
 # Employee list — you can later load this from a file or API
 employee_list = ["Emp1", "Emp2", "Emp3", "Emp4"]
-e_email=["harleen@boscoandroxys.com"]
+
 employee_emails = {
     "Emp1": "harleen@boscoandroxys.com",
     "Emp2": "teddy@boscoandroxys.com",
@@ -46,20 +58,22 @@ if st.button("Notify"):
         if response.status_code == 200:
             st.success("Notification sent. Waiting for response...")
             
-    #         # Poll every 5 seconds for up to 1 minute (adjust as needed)
-    #         for i in range(12):
-    #             time.sleep(5)
-    #             check = requests.get(f"https://your-api.com/check-response/{visit_id}")
-                
-    #             if check.status_code == 200 and check.json().get("response"):
-    #                 st.success("Employee Response:")
-    #                 st.write(check.json()["response"])
-    #                 break
-    #             else:
-    #                 st.info("Still waiting...")
-    #         else:
-    #             st.warning("No response yet. Please wait or contact the front desk.")
-    #     else:
-    #         st.error("Failed to notify. Try again.")
-    # else:
-    #     st.warning("Please enter your name and choose someone to meet.")
+            # Poll every 5 seconds for up to 2 (120/5 = 24) minute 
+            for i in range(24):  
+               time.sleep(5)
+               data = sheet.get_all_records()
+               df = pd.DataFrame(data)
+
+               result = df[df["visit_id"] == visit_id]
+               if not result.empty:
+                   st.success("Employee Response:")
+                   st.write(result.iloc[0]["response"])
+                   break
+               else:
+                    st.info("Still waiting...")
+            else:
+                st.warning("No response yet. Please wait or contact the front desk.")
+        else:
+            st.error("Failed to notify. Try again.")
+    else:
+        st.warning("Please enter your name and choose someone to meet.")
