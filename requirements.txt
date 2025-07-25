@@ -1,4 +1,6 @@
 streamlit
+gspread
+oauth2client
 smartsheet-python-sdk
 streamlit-autorefresh
 numpy
