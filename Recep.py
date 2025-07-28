@@ -24,7 +24,7 @@ sheet = client.open("RecepReply").sheet1
 
 st.set_page_config(page_title="Reception Assistant", layout="centered")
 
-st.title("👋 Welcome to Our Bosco and Roxys's")
+st.title("👋 Welcome to Bosco and Roxys's")
 st.write("Please enter your details to notify the person you're here to meet.")
 
 # Guest details
