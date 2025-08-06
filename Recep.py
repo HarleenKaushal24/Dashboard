@@ -28,7 +28,8 @@ sheet = client.open("RecepReply").sheet1
 #st.set_page_config(page_title="Reception Assistant", layout="centered")
 
 #video_url = "https://www.w3schools.com/html/mov_bbb.mp4"
-video_url = "C:/Users/Harleen/Downloads/MapDashboard/video/video.mp4"
+#video_url = "C:/Users/Harleen/Downloads/MapDashboard/video/video.mp4"
+video_url = "video/video.mp4"
 
 def get_base64_video(video_path):
     with open(video_path, 'rb') as f:
