@@ -341,16 +341,12 @@ link_url = "https://www.boscoandroxys.com/"
 #<div style="width: 100%; overflow-x: auto;">
 overlay_html = f"""
 <div style="width: 100%; overflow-x: auto;">
-
-
-<div style="max-width: 100%; margin: 0 auto; display: flex; align-items: flex-start;">
+<div style="width: 1600px; margin: 0 auto; display: flex; align-items: flex-start;">
 
   <!-- Factory Map with Equipment Buttons -->
-  
-  <div style="position: relative; width: 100%; height: auto; 
+  <div style="position: relative; width: 1500px; height: 1600px; 
       background-image: url('{image_base64}'); background-repeat: no-repeat;
-      background-size: contain; background-position: center; border: 2px solid #ccc;margin: 0 auto;
-      aspect-ratio: 1 / 4; ">"""
+      background-size: contain; background-position: center; border: 2px solid #ccc;margin: 0 auto;">"""
 
 # Add equipment buttons
 for _, row in report1.iterrows():
